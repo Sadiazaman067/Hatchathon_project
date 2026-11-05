@@ -6,7 +6,10 @@ ever silently dropped.
 """
 from __future__ import annotations
 
-from lark import Lark, Transformer, UnexpectedInput
+import re
+
+from lark import Lark, Transformer, UnexpectedInput, UnexpectedToken
+from lark.exceptions import VisitError
 
 from backend.app.ir import (
     OTE,
@@ -24,6 +27,21 @@ ROUTINE_NAME = "MainRoutine"
 # "basic" lexer: keywords like XIC/OTE always lex as keywords, never as tag names.
 _PARSER = Lark.open("grammar.lark", rel_to=__file__, parser="lalr", lexer="basic")
 
+# A word that looks like a Rockwell mnemonic (ADD, MOV, OSR, ...): 3+ capitals.
+_MNEMONIC = re.compile(r"[A-Z]{3,}")
+
+NESTED_BRANCH_MSG = "nested branch (BST inside a branch) is not supported"
+EMPTY_BRANCH_MSG = "empty branch path (always-true shorted wire) is not supported"
+
+
+class _Unsupported(Exception):
+    """Valid ladder that P0 does not support. Becomes an UNSUPPORTED_* diagnostic."""
+
+    def __init__(self, code: str, message: str):
+        super().__init__(message)
+        self.code = code
+        self.message = message
+
 
 class _ToIR(Transformer):
     """Turns Lark's parse tree for one rung into (condition, outputs)."""
@@ -38,6 +56,10 @@ class _ToIR(Transformer):
         return Series(nodes=list(items))
 
     def path(self, items):
+        if not items:
+            raise _Unsupported("UNSUPPORTED_EMPTY_BRANCH", EMPTY_BRANCH_MSG)
+        if any(isinstance(node, Parallel) for node in items):
+            raise _Unsupported("UNSUPPORTED_NESTED_BRANCH", NESTED_BRANCH_MSG)
         # Every branch path is a Series, even with one contact (team decision).
         return Series(nodes=list(items))
 
@@ -56,11 +78,25 @@ class _ToIR(Transformer):
 
 
 def _diagnostic(line_no: int, error: UnexpectedInput) -> ParseDiagnostic:
+    """Turn a Lark syntax error into a diagnostic. An unknown mnemonic where an
+    instruction belongs is UNSUPPORTED_OPCODE; everything else is PARSE_ERROR."""
     column = getattr(error, "column", "?")
+    if isinstance(error, UnexpectedToken):
+        token = error.token
+        if token.type == "$END":
+            return ParseDiagnostic(
+                line_no, "PARSE_ERROR", "rung ended early (missing EOR?)"
+            )
+        if token.type == "TAG" and _MNEMONIC.fullmatch(str(token)):
+            return ParseDiagnostic(
+                line_no, "UNSUPPORTED_OPCODE",
+                f"unsupported instruction '{token}' at column {column}",
+            )
+        return ParseDiagnostic(
+            line_no, "PARSE_ERROR", f"unexpected '{token}' at column {column}"
+        )
     return ParseDiagnostic(
-        line=line_no,
-        code="PARSE_ERROR",
-        message=f"syntax error at column {column}",
+        line_no, "PARSE_ERROR", f"unexpected character at column {column}"
     )
 
 
@@ -77,7 +113,16 @@ def parse(source_text: str) -> Program | list[ParseDiagnostic]:
         except UnexpectedInput as error:
             diagnostics.append(_diagnostic(line_no, error))
             continue
-        condition, outputs = _ToIR().transform(tree)
+        try:
+            condition, outputs = _ToIR().transform(tree)
+        except VisitError as error:
+            # Lark wraps exceptions raised inside the transformer; unwrap ours.
+            if not isinstance(error.orig_exc, _Unsupported):
+                raise
+            diagnostics.append(ParseDiagnostic(
+                line_no, error.orig_exc.code, error.orig_exc.message
+            ))
+            continue
         rungs.append(
             Rung(id=len(rungs) + 1, source_text=text,
                  condition=condition, outputs=outputs)

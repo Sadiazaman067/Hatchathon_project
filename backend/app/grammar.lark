@@ -9,11 +9,13 @@ condition: element*
 ?element: contact
         | branch
 
-// One-level OR branch. Each path holds contacts only (no nested BST).
-// An empty path is rejected rather than guessed to mean "always true".
+// OR branch. The grammar accepts what real RSLogix accepts, including nested
+// branches and empty paths (a shorted wire). parser.py then reports those two
+// as UNSUPPORTED_* diagnostics, because P0 supports only one-level branches
+// whose paths each hold at least one contact.
 branch: "BST" path ("NXB" path)+ "BND"
 
-path: contact+
+path: element*
 
 contact: "XIC" TAG  -> xic
        | "XIO" TAG  -> xio
