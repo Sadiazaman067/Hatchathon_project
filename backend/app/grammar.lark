@@ -1,0 +1,21 @@
+// LadderProof mnemonic grammar: ONE rung per parse (parser.py feeds it line by line).
+// Owner: Tami. Spec: CLAUDE.md "Text format (P0)", CONTRACT.md section 4.
+
+start: "SOR" condition outputs "EOR"
+
+// Left-to-right contacts = AND (a Series). May be empty (bare rung = always true).
+condition: contact*
+
+contact: "XIC" TAG  -> xic
+       | "XIO" TAG  -> xio
+
+// At least one output instruction per rung.
+outputs: ote+
+
+ote: "OTE" TAG
+
+// Legacy SLC addresses (I:1/0, O:2/0, T4:0/DN) and Logix tag names (Start, Timer0.DN).
+TAG: /[A-Za-z_][A-Za-z0-9_:\/.]*/
+
+%import common.WS
+%ignore WS
