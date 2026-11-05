@@ -1,0 +1,24 @@
+# Hidden evaluation set: NEVER commit. Sadia keeps it outside the repo until Saturday's freeze.
+hidden/
+hidden_fixtures/
+answer_key*
+
+# Secrets
+.env
+*.key
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+
+# Local outputs
+results/*.json
+!results/.gitkeep
+.DS_Store

@@ -1,0 +1,72 @@
+{
+  "status": "different",
+  "coverage": {
+    "scenarios": 1,
+    "scans": 2,
+    "seed": 42
+  },
+  "assumptions": {
+    "dt_ms": 10,
+    "executed_scan_index": "1_based",
+    "profiles": [
+      "slc_subset_v1",
+      "logix_subset_v1"
+    ]
+  },
+  "first_divergence": {
+    "scan": 1,
+    "tag": "O:2/0",
+    "legacy": 1,
+    "target": 0,
+    "rung": 1
+  },
+  "mapping_evidence": [
+    {
+      "legacy_tag": "O:2/0",
+      "target_tag": "Motor",
+      "rule": "OUTPUT_MAP_V1"
+    }
+  ],
+  "counterexample": [
+    {
+      "scan": 0,
+      "tag": "I:1/0",
+      "value": 1
+    }
+  ],
+  "rules_used": [],
+  "warnings": [],
+  "trace_window": {
+    "start_scan": 1,
+    "end_scan": 2,
+    "legacy": [
+      {
+        "scan": 1,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 2,
+        "observables": {
+          "O:2/0": 1
+        }
+      }
+    ],
+    "target": [
+      {
+        "scan": 1,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 2,
+        "observables": {
+          "O:2/0": 0
+        }
+      }
+    ]
+  },
+  "_note": "ILLUSTRATIVE FIXTURE (CONTRACT.md section 8 example) for building the UI only. Not a measured result."
+}
