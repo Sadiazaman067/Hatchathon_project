@@ -2,9 +2,8 @@
 
 Read this whole file before writing any frontend code. If a request conflicts with this file, CLAUDE.md or CONTRACT.md, stop and ask. CONTRACT.md wins on data; this file wins on looks.
 
-Reference mockup (two screens, plus video title cards): ask Tami for the link.
 
-**Relationship to CLAUDE.md:** this file expands CLAUDE.md's "UI look" section. Two proposed stack changes (pending the team's OK in the group chat; until then, ask before dropping Recharts or Monaco): the signal timeline is plain SVG instead of Recharts (simpler, and it has to look like a logic analyzer, not a chart), and the Monaco diff is optional: use it only for a "Full program" tab under the report, after the five core pieces work.
+**Relationship to CLAUDE.md:** this file expands CLAUDE.md's "UI look" section. Two stack changes from CLAUDE.md (team informed Thu Nov 5): the signal timeline is plain SVG instead of Recharts (simpler, and it has to look like a logic analyzer, not a chart), and the Monaco diff is optional: use it only for a "Full program" tab under the report, after the five core pieces work.
 
 ## 1. The idea in one line
 
