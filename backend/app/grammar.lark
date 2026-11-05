@@ -3,8 +3,17 @@
 
 start: "SOR" condition outputs "EOR"
 
-// Left-to-right contacts = AND (a Series). May be empty (bare rung = always true).
-condition: contact*
+// Left-to-right elements = AND (a Series). May be empty (bare rung = always true).
+condition: element*
+
+?element: contact
+        | branch
+
+// One-level OR branch. Each path holds contacts only (no nested BST).
+// An empty path is rejected rather than guessed to mean "always true".
+branch: "BST" path ("NXB" path)+ "BND"
+
+path: contact+
 
 contact: "XIC" TAG  -> xic
        | "XIO" TAG  -> xio

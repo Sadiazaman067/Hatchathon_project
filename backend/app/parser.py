@@ -11,6 +11,7 @@ from lark import Lark, Transformer, UnexpectedInput
 from backend.app.ir import (
     OTE,
     Contact,
+    Parallel,
     ParseDiagnostic,
     Program,
     Routine,
@@ -35,6 +36,13 @@ class _ToIR(Transformer):
 
     def condition(self, items):
         return Series(nodes=list(items))
+
+    def path(self, items):
+        # Every branch path is a Series, even with one contact (team decision).
+        return Series(nodes=list(items))
+
+    def branch(self, items):
+        return Parallel(nodes=list(items))
 
     def ote(self, items):
         return OTE(tag=str(items[0]))
