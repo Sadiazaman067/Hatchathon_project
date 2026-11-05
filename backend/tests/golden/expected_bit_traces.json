@@ -1,0 +1,31 @@
+{
+  "description": "Hand-calculated P0 bit/branch traces; independent of the simulator",
+  "cases": {
+    "xic_true_then_false": [
+      {"scan": 1, "observables": {"Motor": 1}},
+      {"scan": 2, "observables": {"Motor": 0}}
+    ],
+    "xio_open_then_pressed": [
+      {"scan": 1, "observables": {"Motor": 1}},
+      {"scan": 2, "observables": {"Motor": 0}}
+    ],
+    "series_and": [
+      {"scan": 1, "observables": {"Motor": 1}},
+      {"scan": 2, "observables": {"Motor": 0}},
+      {"scan": 3, "observables": {"Motor": 0}}
+    ],
+    "parallel_or": [
+      {"scan": 1, "observables": {"Motor": 1}},
+      {"scan": 2, "observables": {"Motor": 0}}
+    ],
+    "seal_in_motor": [
+      {"scan": 1, "observables": {"O:2/0": 1}},
+      {"scan": 2, "observables": {"O:2/0": 1}},
+      {"scan": 3, "observables": {"O:2/0": 0}},
+      {"scan": 4, "observables": {"O:2/0": 0}}
+    ],
+    "later_rung_sees_earlier_coil": [
+      {"scan": 1, "observables": {"Motor": 1, "Relay": 1}}
+    ]
+  }
+}
