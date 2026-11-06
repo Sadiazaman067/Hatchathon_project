@@ -94,12 +94,12 @@ def test_reject_duplicate_event():
         run(p, events((0, "Start", 1), (0, "Start", 0)), "slc_subset_v1", 10)
 
 
-def test_timer_not_silently_simulated():
+def test_timer_requires_explicit_horizon():
     p = ir.Program(routines=[ir.Routine(name="Main", rungs=[ir.Rung(
         id=1, source_text="TON fixture", condition=c("XIC", "Start"),
         outputs=[ir.TON(timer="T4:0", preset=50, timebase_ms=10)],
     )])])
-    with pytest.raises(NeedsReviewError, match="UNVALIDATED_TON_S6"):
+    with pytest.raises(NeedsReviewError, match="MISSING_TIMER_HORIZON"):
         run(p, events((0, "Start", 1)), "slc_subset_v1", 10)
 
 
