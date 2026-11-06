@@ -43,27 +43,36 @@ def _observable_rows(tag_map: list[TagMapping]) -> list[TagMapping]:
     return sorted(rows, key=lambda m: m.legacy_tag)
 
 
+def _native_and_link(row: TagMapping, side: str) -> tuple[str, str]:
+    if side == "legacy":
+        return row.legacy_tag, f"mapped to {row.target_tag}"
+    return row.target_tag, f"mapped from {row.legacy_tag}"
+
+
+def missing_observable(row: TagMapping, side: str) -> ComparisonError:
+    """The error for a mapped observable that one program never writes, e.g.
+    'MISSING_OBSERVABLE: target never writes Motor (mapped from O:2/0)'.
+    Shared with verify()'s pre-run check so both say exactly the same thing."""
+    native, link = _native_and_link(row, side)
+    return ComparisonError("MISSING_OBSERVABLE", f"{side} never writes {native} ({link})")
+
+
 def canonical_observables(trace: Trace, tag_map: list[TagMapping], side: str) -> Trace:
     """Rewrite one side's trace into legacy (canonical) tag names, keeping only
     mapped observables. Raises MISSING_OBSERVABLE if a mapped tag is absent."""
     if side not in _SIDES:
         raise ValueError(f"side must be 'legacy' or 'target', got {side!r}")
     rows = _observable_rows(tag_map)
-    other = "target" if side == "legacy" else "legacy"
 
     for row in rows:
-        native = getattr(row, f"{side}_tag")
-        partner = getattr(row, f"{other}_tag")
-        link = "mapped from" if side == "target" else "mapped to"
+        native, link = _native_and_link(row, side)
         if not any(native in entry.observables for entry in trace):
-            raise ComparisonError(
-                "MISSING_OBSERVABLE", f"{side} never writes {native} ({link} {partner})"
-            )
+            raise missing_observable(row, side)
         for entry in trace:
             if native not in entry.observables:
                 raise ComparisonError(
                     "MISSING_OBSERVABLE",
-                    f"{side} trace has no {native} at scan {entry.scan} ({link} {partner})",
+                    f"{side} trace has no {native} at scan {entry.scan} ({link})",
                 )
 
     return [
