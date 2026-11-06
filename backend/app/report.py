@@ -26,6 +26,7 @@ from backend.app.ir import (
     Contact,
     InputEvent,
     Parallel,
+    ParseDiagnostic,
     Program,
     Series,
     TagMapping,
@@ -147,6 +148,11 @@ def check_mappings(legacy_ir: Program, target_ir: Program,
     warnings: list[str] = []
 
     for row in tag_map:
+        if row.kind not in ("input", "observable"):
+            warnings.append(
+                f"INVALID_MAPPING_KIND: {row.legacy_tag} -> {row.target_tag} "
+                f"has kind '{row.kind}' (expected input or observable)"
+            )
         if not row.evidence.startswith(CONFIRMED_PREFIX):
             warnings.append(
                 f"UNCONFIRMED_MAPPING: {row.legacy_tag} -> {row.target_tag} "
@@ -213,6 +219,20 @@ def _report(config: VerifyConfig, status: str, warnings: list[str], *,
         "warnings": warnings,
         "trace_window": window,
     }
+
+
+def parse_failure_report(config: VerifyConfig,
+                         legacy_diagnostics: list[ParseDiagnostic],
+                         target_diagnostics: list[ParseDiagnostic]) -> Report:
+    """A needs_review report for programs that did not parse. Warnings keep
+    the stable code first, e.g. 'UNSUPPORTED_OPCODE: legacy line 3: ...'."""
+    warnings = [
+        f"{d.code}: {side} line {d.line}: {d.message}"
+        for side, diagnostics in (("legacy", legacy_diagnostics),
+                                  ("target", target_diagnostics))
+        for d in diagnostics
+    ]
+    return _report(config, "needs_review", warnings)
 
 
 def _evidence(rows: list[TagMapping]) -> list[MappingEvidence]:

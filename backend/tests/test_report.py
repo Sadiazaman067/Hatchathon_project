@@ -225,6 +225,25 @@ def test_rung_is_null_when_two_legacy_rungs_write_the_tag(use_engine):
     assert result["first_divergence"]["rung"] is None
 
 
+def test_invalid_mapping_kind_is_flagged():
+    bad = MAP + [TagMapping("O:2/1", "Lamp", "output", "OUTPUT_MAP_V1", "user-confirmed")]
+    assert report.check_mappings(LEGACY, TARGET, bad) == [
+        "INVALID_MAPPING_KIND: O:2/1 -> Lamp has kind 'output' (expected input or observable)"
+    ]
+
+
+def test_parse_failure_report():
+    from backend.app.ir import ParseDiagnostic
+    result = report.parse_failure_report(
+        CONFIG, [ParseDiagnostic(3, "UNSUPPORTED_OPCODE", "unsupported instruction 'ADD' at column 15")], [],
+    )
+    assert result["status"] == "needs_review"
+    assert result["warnings"] == [
+        "UNSUPPORTED_OPCODE: legacy line 3: unsupported instruction 'ADD' at column 15"
+    ]
+    assert result["coverage"] == {"scenarios": 0, "scans": 0, "seed": 7}
+
+
 def test_timer_bits_need_explicit_mappings():
     legacy = parse("SOR XIC I:1/0 TON T4:0 0.01 50 0 EOR")
     target = parse("SOR XIC Start TON Timer0 500 0 EOR")
