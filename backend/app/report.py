@@ -235,10 +235,16 @@ def parse_failure_report(config: VerifyConfig,
     return _report(config, "needs_review", warnings)
 
 
+def needs_review_report(config: VerifyConfig, warnings: list[str]) -> Report:
+    """A needs_review report with nothing run, for problems found before verify()
+    (e.g. the API's NO_TARGET). Each warning starts with its stable code."""
+    return _report(config, "needs_review", list(warnings))
+
+
 def unresolved_report(config: VerifyConfig, unresolved: list[str]) -> Report:
     """A needs_review report for a conversion that left anything unresolved.
     The unresolved strings already start with their stable code."""
-    return _report(config, "needs_review", list(unresolved))
+    return needs_review_report(config, unresolved)
 
 
 def with_rules_used(report: Report, rule_ids: list[str]) -> Report:

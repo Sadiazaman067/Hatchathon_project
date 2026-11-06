@@ -44,6 +44,16 @@ Owner: Tami. CONTRACT.md stays normative; this file records additions made while
 - TON runs under S6 (Arnav's PR #2). Converted timer programs verify end to end; an unscaled preset (`TON T4_0 50 0`) shows `different` at scan 6.
 - `render(program)` gives the demonstration mnemonic text, one `SOR ... EOR` line per rung. `parse(render(p)) == p`.
 
+## HTTP API (backend/app/api.py)
+
+- Start it from the repo root: `uvicorn backend.app.api:app --reload --port 8000`. CORS allows the Vite dev server (`http://localhost:5173`, `http://127.0.0.1:5173`).
+- Projects are stored as `data/projects/<id>.json` (git-ignored).
+- `POST /api/projects` `{legacy_text, target_text|null}` -> `{project_id, rung_count, diagnostics, target_rung_count, target_diagnostics}` (CONTRACT §9, changelog 2026-11-06).
+- `POST /api/projects/{id}/convert` `{}` -> `{converted_text, tag_map, rule_ids, unresolved}`. If nothing is unresolved, the converted text **replaces** the stored target, so the UI asks first when a target was uploaded.
+- `POST /api/projects/{id}/verify` `{seed, scenarios, scans, dt_ms, tag_map, confirmed_tag_map}` -> Report. Scenarios are generated from the config. `confirmed_tag_map` false/missing -> `needs_review` (`UNCONFIRMED_MAPPING: confirmed_tag_map is false`); no target -> `needs_review` (`NO_TARGET`).
+- `GET /api/projects/{id}/report` -> the last report, or 404 before the first verify.
+- Unknown project: 404. Bad body (missing/wrong-type/unknown keys): 422. Server fault: 500 `{"detail": "internal server error"}`.
+
 ## API wiring (for api.py)
 
 - `/convert`: `converted_text = render(target_ir)`; return `tag_map`, `rule_ids`, `unresolved` as convert() gives them.
@@ -68,7 +78,7 @@ Owner: Tami. CONTRACT.md stays normative; this file records additions made while
 ## Warning codes
 
 - Mapping (before running): `UNCONFIRMED_MAPPING`, `AMBIGUOUS_MAPPING`, `INVALID_MAPPING_KIND`, `UNMAPPED_INPUT`, `UNMAPPED_OUTPUT`, `MISSING_OBSERVABLE`.
-- Running and comparing: `UNMAPPED_INPUT_EVENT`, `TRACE_SCAN_MISMATCH`, `NO_OBSERVABLE_MAPPINGS`, `EMPTY_TRACE`, `NO_SCENARIOS`, `SCENARIO_GENERATION_FAILED`, plus run()'s own `NeedsReviewError` codes.
+- Running and comparing: `UNMAPPED_INPUT_EVENT`, `TRACE_SCAN_MISMATCH`, `NO_OBSERVABLE_MAPPINGS`, `EMPTY_TRACE`, `NO_SCENARIOS`, `SCENARIO_GENERATION_FAILED`, `NO_TARGET` (API), plus run()'s own `NeedsReviewError` codes.
 - Parser: `PARSE_ERROR`, `UNSUPPORTED_OPCODE`, `UNSUPPORTED_NESTED_BRANCH`, `UNSUPPORTED_EMPTY_BRANCH`, `UNSUPPORTED_TIMEBASE`, `UNSUPPORTED_TIMER_ACC`.
 - Translator: `UNRESOLVED_ADDRESS`, `UNRESOLVED_INSTRUCTION`, `UNRESOLVED_INPUT_WRITE`, `UNRESOLVED_OUTPUT_READ`, `UNRESOLVED_TIMER_READ`, `UNRESOLVED_TIMER_WRITE`, `UNRESOLVED_DUPLICATE_TIMER`.
 
