@@ -1,0 +1,62 @@
+{
+  "note": "Hand-calculated outputs for proposed S6; awaiting Tami's review of the model against Rockwell documentation. Keys are executed scan numbers, not zero-based indices.",
+  "tuple_order": ["DN", "TT", "Motor"],
+  "cases": {
+    "correct_slc_50ms": {
+      "profile": "slc_subset_v1",
+      "preset": 5,
+      "timebase_ms": 10,
+      "scans": 10,
+      "events": [[0, 1]],
+      "checks": {"1": [0, 1, 0], "5": [0, 1, 0], "6": [1, 0, 1], "10": [1, 0, 1]}
+    },
+    "correct_logix_50ms": {
+      "profile": "logix_subset_v1",
+      "preset": 50,
+      "timebase_ms": 1,
+      "scans": 10,
+      "events": [[0, 1]],
+      "checks": {"1": [0, 1, 0], "5": [0, 1, 0], "6": [1, 0, 1], "10": [1, 0, 1]}
+    },
+    "reset_and_reenable_slc": {
+      "profile": "slc_subset_v1",
+      "preset": 5,
+      "timebase_ms": 10,
+      "scans": 14,
+      "events": [[0, 1], [7, 0], [8, 1]],
+      "checks": {"6": [1, 0, 1], "7": [0, 0, 0], "8": [0, 1, 0], "12": [0, 1, 0], "13": [1, 0, 1]}
+    },
+    "reset_and_reenable_logix": {
+      "profile": "logix_subset_v1",
+      "preset": 50,
+      "timebase_ms": 1,
+      "scans": 14,
+      "events": [[0, 1], [7, 0], [8, 1]],
+      "checks": {"6": [1, 0, 1], "7": [0, 0, 0], "8": [0, 1, 0], "12": [0, 1, 0], "13": [1, 0, 1]}
+    },
+    "slc_one_second_timebase": {
+      "profile": "slc_subset_v1",
+      "preset": 1,
+      "timebase_ms": 1000,
+      "scans": 103,
+      "events": [[0, 1]],
+      "checks": {"1": [0, 1, 0], "100": [0, 1, 0], "101": [1, 0, 1], "103": [1, 0, 1]}
+    },
+    "legacy_500ms": {
+      "profile": "slc_subset_v1",
+      "preset": 50,
+      "timebase_ms": 10,
+      "scans": 55,
+      "events": [[0, 1]],
+      "checks": {"1": [0, 1, 0], "6": [0, 1, 0], "50": [0, 1, 0], "51": [1, 0, 1]}
+    },
+    "buggy_target_50ms": {
+      "profile": "logix_subset_v1",
+      "preset": 50,
+      "timebase_ms": 1,
+      "scans": 55,
+      "events": [[0, 1]],
+      "checks": {"1": [0, 1, 0], "5": [0, 1, 0], "6": [1, 0, 1], "51": [1, 0, 1]}
+    }
+  }
+}
