@@ -3,7 +3,7 @@ import { STEPS } from "../steps";
 type Props = {
   current: number;
   onSelect: (index: number) => void;
-  /** One short line under each step. Later screens pass real text like "3 of 3 confirmed". */
+  /** One short line under each step. Later screens supply real text like "3 of 3 confirmed". */
   statusLines?: string[];
 };
 
