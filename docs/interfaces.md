@@ -55,6 +55,16 @@ Owner: Tami. CONTRACT.md stays normative; this file records additions made while
 - `tag_map.json`: a list of rows with exactly the keys `legacy_tag`, `target_tag`, `kind` (`input` | `observable`), `rule`, `evidence`.
 - `inputs.json`: one scenario (a list of `{"scan", "tag", "value"}` events) or several (a list of such lists).
 
+## Benchmark runner
+
+- `python -m backend.app.cli benchmark <suite_folder> [--out results/<name>.json] [--scans N]`
+- A suite is a folder of program folders (nesting allowed). A program folder holds `legacy.txt`, `tag_map.json`, optional `inputs.json` (without it, verify() generates scenarios) and one or more targets: `target.txt` or `target_<name>.txt`. Each target is one case. Every other file (including `expected.json`) is ignored.
+- Per case: `program`, `target`, `status`, `first_divergence`, `coverage`, `warning_codes`, `seconds`, `fixture_error`. Top level: `suite`, `commit`, `dirty`, `run_at`, `config`, `cases`.
+- No answer key is read and nothing is scored; compare the results file with the answer key by hand or outside the repo.
+- A folder that can't be read as fixtures (missing file, bad JSON, wrong keys, no target, empty folder) gets `fixture_error` with `status: null`, never one of the three statuses.
+- Suite folders inside the repo are refused (exit 2), except under `backend/tests/fixtures/`. Keep the hidden set outside the repo.
+- Same suite, seed and commit give identical results except `seconds` and `run_at`.
+
 ## Warning codes
 
 - Mapping (before running): `UNCONFIRMED_MAPPING`, `AMBIGUOUS_MAPPING`, `INVALID_MAPPING_KIND`, `UNMAPPED_INPUT`, `UNMAPPED_OUTPUT`, `MISSING_OBSERVABLE`.
