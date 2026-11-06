@@ -1,6 +1,7 @@
 """Thursday gate, end to end through the CLI with the real engine (no stand-ins).
 These inline programs are placeholders; Sadia's fixture files replace them."""
 import json
+from pathlib import Path
 
 import pytest
 
@@ -167,6 +168,35 @@ def test_unscaled_timer_preset_is_different_at_scan_6():
     assert report["status"] == "different"
     assert report["first_divergence"] == {
         "scan": 6, "tag": "O:2/0", "legacy": 0, "target": 1, "rung": 2,
+    }
+
+
+AI_DEMO = Path(__file__).resolve().parents[2] / "demo" / "ai_conversion"
+
+
+def run_ai_demo(capsys, target_file):
+    code = cli.main([
+        "verify", "--legacy", str(AI_DEMO / "legacy.txt"),
+        "--target", str(AI_DEMO / target_file),
+        "--map", str(AI_DEMO / "tag_map.json"),
+        "--inputs", str(AI_DEMO / "inputs.json"),
+    ])
+    assert code == 0
+    return json.loads(capsys.readouterr().out)
+
+
+def test_ai_demo_conversion_is_no_difference_observed(capsys):
+    report = run_ai_demo(capsys, "target_ai.txt")
+    assert report["status"] == "no_difference_observed"
+    assert report["coverage"] == {"scenarios": 3, "scans": 900, "seed": 42}
+    assert report["warnings"] == []
+
+
+def test_ai_demo_unscaled_preset_is_different_at_scan_21(capsys):
+    report = run_ai_demo(capsys, "target_ai_unscaled_example.txt")
+    assert report["status"] == "different"
+    assert report["first_divergence"] == {
+        "scan": 21, "tag": "O:2/0", "legacy": 0, "target": 1, "rung": 4,
     }
 
 

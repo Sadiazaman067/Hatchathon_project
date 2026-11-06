@@ -1,0 +1,11 @@
+[
+  [{"scan": 0, "tag": "I:1/0", "value": 1}, {"scan": 0, "tag": "I:1/1", "value": 0},
+   {"scan": 5, "tag": "I:1/0", "value": 0},
+   {"scan": 250, "tag": "I:1/1", "value": 1}, {"scan": 255, "tag": "I:1/1", "value": 0}],
+  [{"scan": 0, "tag": "I:1/0", "value": 1}, {"scan": 0, "tag": "I:1/1", "value": 0},
+   {"scan": 100, "tag": "I:1/1", "value": 1}, {"scan": 101, "tag": "I:1/1", "value": 0},
+   {"scan": 120, "tag": "I:1/0", "value": 0}],
+  [{"scan": 0, "tag": "I:1/0", "value": 0}, {"scan": 0, "tag": "I:1/1", "value": 0},
+   {"scan": 10, "tag": "I:1/0", "value": 1}, {"scan": 12, "tag": "I:1/0", "value": 0},
+   {"scan": 150, "tag": "I:1/1", "value": 1}, {"scan": 150, "tag": "I:1/0", "value": 1}]
+]
