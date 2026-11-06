@@ -5,6 +5,8 @@ Each note: at most 2 lines, plain English, action first. Details live in docs/in
 
 ---
 
+- **2026-11-06 · Tami:** Please update scenarios.py now that S6 is merged: it still raises "Timer boundary scenarios require the S6 validation gate" for TON programs.
+- **2026-11-06 · Tami:** Please confirm the SLC TON first-scan rule (S6) against 1747-RM001, and add the page to docs/semantics.md.
 - **2026-11-06 · Tami:** convert() now outputs target timers as `T4_0` with status tags `T4_0.DN` / `T4_0.TT`. Please trace them under exactly those names once timers run.
 - **2026-11-06 · Tami:** Timer gate is today: confirm S6 against the TON flowchart, then ping Tami to review.
 - **2026-11-06 · Tami:** Please add an optional `scans` argument to run() (default = current behavior), so scenarios can run a fixed number of scans.

@@ -2,8 +2,7 @@
 
     python -m backend.app.cli verify --legacy L.txt --target T.txt --map tag_map.json --inputs inputs.json [--scans N]
 
---scans N says each scenario is expected to run N scans; if fewer ran, the
-report warns SCAN_HORIZON. Without it there is no requested count, so no warning.
+--scans N sets how many scans every scenario runs (config.scans, default 300).
 
 Prints the CONTRACT §8 report as JSON on stdout and exits 0, whatever the status.
 Malformed input files (bad JSON or wrong fields) print an error on stderr and exit 2.
@@ -58,16 +57,14 @@ def load_scenarios(data) -> list[list[InputEvent]]:
 
 
 def run_verify(legacy_text: str, target_text: str, tag_map: list[TagMapping],
-               scenarios: list[list[InputEvent]], config: VerifyConfig, *,
-               check_horizon: bool = False) -> Report:
+               scenarios: list[list[InputEvent]], config: VerifyConfig) -> Report:
     """Parse both programs and verify them. Pure: no file access."""
     legacy, target = parse(legacy_text), parse(target_text)
     legacy_diags = legacy if isinstance(legacy, list) else []
     target_diags = target if isinstance(target, list) else []
     if legacy_diags or target_diags:
         return parse_failure_report(config, legacy_diags, target_diags)
-    return verify(legacy, target, tag_map, config, input_scenarios=scenarios,
-                  check_horizon=check_horizon)
+    return verify(legacy, target, tag_map, config, input_scenarios=scenarios)
 
 
 def _positive_int(text: str) -> int:
@@ -93,8 +90,8 @@ def main(argv: list[str] | None = None) -> int:
     verify_cmd.add_argument("--map", required=True, help="confirmed tag map JSON (CONTRACT §6)")
     verify_cmd.add_argument("--inputs", required=True, help="input events JSON (CONTRACT §6)")
     verify_cmd.add_argument(
-        "--scans", type=_positive_int, default=None,
-        help="expected executed scans per scenario; warns (SCAN_HORIZON) if fewer ran",
+        "--scans", type=_positive_int, default=VerifyConfig.scans,
+        help=f"scans per scenario (default {VerifyConfig.scans})",
     )
     args = parser.parse_args(argv)
 
@@ -107,9 +104,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: {error}", file=sys.stderr)
         return 2
 
-    config = VerifyConfig() if args.scans is None else VerifyConfig(scans=args.scans)
-    report = run_verify(legacy_text, target_text, tag_map, scenarios, config,
-                        check_horizon=args.scans is not None)
+    report = run_verify(legacy_text, target_text, tag_map, scenarios,
+                        VerifyConfig(scans=args.scans))
     print(json.dumps(report, indent=2))
     return 0
 

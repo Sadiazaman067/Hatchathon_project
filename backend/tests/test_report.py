@@ -39,21 +39,24 @@ class FakeNeedsReview(Exception):
 class FakeEngine:
     """Stand-in for Arnav's run() and generate_scenarios()."""
 
-    def __init__(self, traces=None, fail_profile=None, generated=None):
+    def __init__(self, traces=None, fail_profile=None, generated=None, gen_error=None):
         self.traces = traces or {}
         self.fail_profile = fail_profile
         self.generated = generated
-        self.calls = []        # (profile, input_events, dt_ms)
+        self.gen_error = gen_error
+        self.calls = []        # (profile, input_events, dt_ms, scans)
         self.gen_calls = []
 
-    def run(self, program_ir, input_events, profile, dt_ms):
-        self.calls.append((profile, input_events, dt_ms))
+    def run(self, program_ir, input_events, profile, dt_ms, scans=None):
+        self.calls.append((profile, input_events, dt_ms, scans))
         if profile == self.fail_profile:
             raise FakeNeedsReview("UNVALIDATED_TON_S6: timer model is not approved yet")
         return self.traces[profile]
 
     def generate_scenarios(self, program_ir, *, seed, scenarios, scans, input_tags=None):
         self.gen_calls.append((seed, scenarios, scans))
+        if self.gen_error is not None:
+            raise self.gen_error
         return self.generated
 
 
@@ -108,9 +111,9 @@ def test_flipped_stop_is_different_at_scan_1(use_engine):
     }
     # Both programs got the same events; the target got them under target names.
     assert engine.calls == [
-        ("slc_subset_v1", EVENTS, 10),
+        ("slc_subset_v1", EVENTS, 10, 2),
         ("logix_subset_v1", [InputEvent(0, "Start", 1), InputEvent(0, "Stop", 0),
-                             InputEvent(2, "Start", 0)], 10),
+                             InputEvent(2, "Start", 0)], 10, 2),
     ]
 
 
@@ -127,31 +130,25 @@ def test_correct_target_is_no_difference_observed(use_engine):
 
 
 LONG = VerifyConfig(seed=7, scenarios=1, scans=300, dt_ms=10)
-HORIZON_1_OF_1 = ("SCAN_HORIZON: 1 of 1 scenarios ran fewer than the 300 requested "
-                  "scans (run() stops at the last input event)")
 
 
-def test_passed_in_scenarios_have_no_horizon_check_by_default(use_engine):
-    use_engine(correct_engine())
+def test_both_runs_get_config_scans(use_engine):
+    engine = use_engine(correct_engine())
     result = report.verify(LEGACY, TARGET, MAP, LONG, input_scenarios=[EVENTS])
-    assert result["status"] == "no_difference_observed"
-    assert result["coverage"]["scans"] == 2
+    assert [call[3] for call in engine.calls] == [300, 300]
     assert result["warnings"] == []
 
 
-def test_passed_in_scenarios_horizon_check_on_request(use_engine):
-    use_engine(correct_engine())
-    result = report.verify(LEGACY, TARGET, MAP, LONG, input_scenarios=[EVENTS],
-                           check_horizon=True)
-    assert result["coverage"]["scans"] == 2
-    assert result["warnings"] == [HORIZON_1_OF_1]
-
-
-def test_generated_scenarios_that_ran_short_warn(use_engine):
+def test_scenario_generation_error_is_needs_review(use_engine):
     engine = use_engine(correct_engine())
-    engine.generated = [EVENTS]
-    result = report.verify(LEGACY, TARGET, MAP, LONG)
-    assert result["warnings"] == [HORIZON_1_OF_1]
+    engine.gen_error = ValueError("Timer boundary scenarios require the S6 validation gate")
+    result = report.verify(LEGACY, TARGET, MAP, CONFIG)
+    assert result["status"] == "needs_review"
+    assert result["warnings"] == [
+        "SCENARIO_GENERATION_FAILED: Timer boundary scenarios require the S6 validation gate"
+    ]
+    assert result["first_divergence"] is None
+    assert engine.calls == []
 
 
 def test_none_scenarios_uses_generator_with_config(use_engine):

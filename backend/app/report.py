@@ -252,41 +252,31 @@ def _evidence(rows: list[TagMapping]) -> list[MappingEvidence]:
             for r in rows]
 
 
-def _horizon_warning(short: int, scenarios: int, wanted: int) -> list[str]:
-    if not short:
-        return []
-    return [
-        f"SCAN_HORIZON: {short} of {scenarios} scenarios ran fewer than the "
-        f"{wanted} requested scans (run() stops at the last input event)"
-    ]
-
-
 def verify(legacy_ir: Program, target_ir: Program, tag_map: list[TagMapping],
            config: VerifyConfig, *,
-           input_scenarios: list[list[InputEvent]] | None = None,
-           check_horizon: bool | None = None) -> Report:
+           input_scenarios: list[list[InputEvent]] | None = None) -> Report:
     """Run both programs on identical inputs and report the first difference.
 
     input_scenarios=None uses Arnav's generate_scenarios with the config.
-    check_horizon: warn (SCAN_HORIZON) when a scenario ran fewer than
-    config.scans scans. None means: only when verify() generated the scenarios,
-    because passed-in scenarios carry no requested scan count."""
-    if check_horizon is None:
-        check_horizon = input_scenarios is None
-
+    Every scenario runs exactly config.scans scans on both sides (run(scans=...)).
+    If scenario generation fails for any reason, the result is needs_review."""
     problems = check_mappings(legacy_ir, target_ir, tag_map)
     if problems:
         return _report(config, "needs_review", problems)
 
     run, needs_review_error, generate_scenarios = _engine()
     if input_scenarios is None:
-        input_scenarios = generate_scenarios(
-            legacy_ir, seed=config.seed, scenarios=config.scenarios, scans=config.scans
-        )
+        try:
+            input_scenarios = generate_scenarios(
+                legacy_ir, seed=config.seed, scenarios=config.scenarios, scans=config.scans
+            )
+        except Exception as error:  # any generator failure is a review item, never a crash
+            return _report(config, "needs_review",
+                           [f"SCENARIO_GENERATION_FAILED: {error}"])
     if not input_scenarios:
         return _report(config, "needs_review", ["NO_SCENARIOS: there are no input scenarios to run"])
 
-    scenarios_run = scans_run = short = 0
+    scenarios_run = scans_run = 0
 
     def review(message: str) -> Report:
         return _report(config, "needs_review", [message],
@@ -298,11 +288,13 @@ def verify(legacy_ir: Program, target_ir: Program, tag_map: list[TagMapping],
         except ComparisonError as error:
             return review(str(error))
         try:
-            legacy_trace = run(legacy_ir, list(events), LEGACY_PROFILE, config.dt_ms)
+            legacy_trace = run(legacy_ir, list(events), LEGACY_PROFILE, config.dt_ms,
+                               scans=config.scans)
         except needs_review_error as error:
             return review(f"{error} (legacy program)")
         try:
-            target_trace = run(target_ir, target_events, TARGET_PROFILE, config.dt_ms)
+            target_trace = run(target_ir, target_events, TARGET_PROFILE, config.dt_ms,
+                               scans=config.scans)
         except needs_review_error as error:
             return review(f"{error} (target program)")
         try:
@@ -312,7 +304,6 @@ def verify(legacy_ir: Program, target_ir: Program, tag_map: list[TagMapping],
 
         scenarios_run += 1
         scans_run += len(legacy_trace)
-        short += check_horizon and len(legacy_trace) < config.scans
 
         if divergence is not None:
             tag = divergence["tag"]
@@ -329,8 +320,7 @@ def verify(legacy_ir: Program, target_ir: Program, tag_map: list[TagMapping],
                            key=lambda r: r.legacy_tag)
             window = trace_window(legacy_trace, target_trace, tag_map, divergence["scan"])
             return _report(
-                config, "different",
-                _horizon_warning(short, scenarios_run, config.scans),
+                config, "different", [],
                 scenarios=scenarios_run, scans=scans_run, divergence=divergence,
                 mapping_evidence=_evidence(rows), counterexample=counterexample,
                 window={
@@ -341,7 +331,6 @@ def verify(legacy_ir: Program, target_ir: Program, tag_map: list[TagMapping],
             )
 
     return _report(
-        config, "no_difference_observed",
-        _horizon_warning(short, scenarios_run, config.scans),
+        config, "no_difference_observed", [],
         scenarios=scenarios_run, scans=scans_run, mapping_evidence=_evidence(tag_map),
     )

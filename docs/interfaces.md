@@ -8,14 +8,15 @@ Owner: Tami. CONTRACT.md stays normative; this file records additions made while
 - Run `pytest` from the repo root. The root `pytest.ini` sets `pythonpath = .`; imports are `from backend.app...`.
 - CLI, from the repo root:
   `python -m backend.app.cli verify --legacy <file> --target <file> --map <file> --inputs <file> [--scans N]`
-  It prints the §8 report as JSON and exits 0, whatever the status. Malformed files print `error: ...` and exit 2. `--scans N` turns on the `SCAN_HORIZON` check (see below).
+  It prints the §8 report as JSON and exits 0, whatever the status. Malformed files print `error: ...` and exit 2. `--scans N` sets `config.scans`, the scans every scenario runs (default 300).
 
 ## verify() additions (pending ratification)
 
-`verify(legacy_ir, target_ir, tag_map, config, *, input_scenarios=None, check_horizon=None)`
+`verify(legacy_ir, target_ir, tag_map, config, *, input_scenarios=None)`
 
 - `input_scenarios`: a list of scenarios, each a list of `InputEvent` in legacy names. `None` means verify() calls `generate_scenarios(legacy_ir, seed, scenarios, scans)` from the config.
-- `check_horizon`: warn `SCAN_HORIZON` when a scenario ran fewer than `config.scans` scans. `None` means only when verify() generated the scenarios itself.
+- verify() calls `run(..., scans=config.scans)` on both sides, so every scenario runs exactly `config.scans` scans. An input event after that scan gives `needs_review` (`INPUT_EVENT_OUTSIDE_HORIZON` from run()).
+- If `generate_scenarios()` raises anything, verify() returns `needs_review` with `SCENARIO_GENERATION_FAILED: <message>`.
 - verify() catches `NeedsReviewError` from run() and adds `(legacy program)` or `(target program)` to the warning.
 - `coverage.scans` always counts scans actually executed.
 
@@ -40,7 +41,7 @@ Owner: Tami. CONTRACT.md stays normative; this file records additions made while
 - TON (`TON_TIMEBASE_MAP_V1`): `TON T4:0 0.01 50 0 -> TON T4_0 500 0`. Target preset in ms = legacy preset x timebase_ms (10 or 1000), exact integers, so the duration is unchanged.
 - Timer status bits (`TIMER_STATUS_MAP_V1`): `T4:0/DN -> T4_0.DN`, `T4:0/TT -> T4_0.TT`. Every TON gets both observable rows, even if no rung reads them.
 - Timer cases left unresolved: a leading-zero timer like `T4:00`, `/EN`, `/ACC`, `/PRE` (`UNRESOLVED_ADDRESS`); a DN/TT read with no TON for that timer (`UNRESOLVED_TIMER_READ`); two TONs on one timer (`UNRESOLVED_DUPLICATE_TIMER`); an OTE on a timer bit (`UNRESOLVED_TIMER_WRITE`).
-- Until the timer gate passes, verify() on any timer program returns `needs_review` (`UNVALIDATED_TON_S6` from run()).
+- TON runs under S6 (Arnav's PR #2). Converted timer programs verify end to end; an unscaled preset (`TON T4_0 50 0`) shows `different` at scan 6.
 - `render(program)` gives the demonstration mnemonic text, one `SOR ... EOR` line per rung. `parse(render(p)) == p`.
 
 ## API wiring (for api.py)
@@ -57,10 +58,11 @@ Owner: Tami. CONTRACT.md stays normative; this file records additions made while
 ## Warning codes
 
 - Mapping (before running): `UNCONFIRMED_MAPPING`, `AMBIGUOUS_MAPPING`, `INVALID_MAPPING_KIND`, `UNMAPPED_INPUT`, `UNMAPPED_OUTPUT`, `MISSING_OBSERVABLE`.
-- Running and comparing: `UNMAPPED_INPUT_EVENT`, `TRACE_SCAN_MISMATCH`, `NO_OBSERVABLE_MAPPINGS`, `EMPTY_TRACE`, `NO_SCENARIOS`, `SCAN_HORIZON`, plus run()'s own `NeedsReviewError` codes.
+- Running and comparing: `UNMAPPED_INPUT_EVENT`, `TRACE_SCAN_MISMATCH`, `NO_OBSERVABLE_MAPPINGS`, `EMPTY_TRACE`, `NO_SCENARIOS`, `SCENARIO_GENERATION_FAILED`, plus run()'s own `NeedsReviewError` codes.
 - Parser: `PARSE_ERROR`, `UNSUPPORTED_OPCODE`, `UNSUPPORTED_NESTED_BRANCH`, `UNSUPPORTED_EMPTY_BRANCH`, `UNSUPPORTED_TIMEBASE`, `UNSUPPORTED_TIMER_ACC`.
 - Translator: `UNRESOLVED_ADDRESS`, `UNRESOLVED_INSTRUCTION`, `UNRESOLVED_INPUT_WRITE`, `UNRESOLVED_OUTPUT_READ`, `UNRESOLVED_TIMER_READ`, `UNRESOLVED_TIMER_WRITE`, `UNRESOLVED_DUPLICATE_TIMER`.
 
 ## Open issues
 
-- **Scan horizon.** run() stops at the last input event. In a trial of 200 generated scenarios x 300 scans on the seal-in program, 194 ran short (52,951 of 60,000 scans). Requested fix: an optional `scans` argument to run() (default = current behavior), **pending ratification**.
+- **Scan horizon: resolved.** run() takes `scans`; verify() always passes `config.scans`. `SCAN_HORIZON` and `check_horizon` are gone.
+- **Generated scenarios for timer programs.** `generate_scenarios()` still refuses TON programs, so verify() without passed-in scenarios gives `needs_review` (`SCENARIO_GENERATION_FAILED`) for them. Waiting on Arnav.

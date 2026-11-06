@@ -71,23 +71,23 @@ def test_correct_target_is_no_difference_observed(run_cli):
     assert code == 0
     assert report["status"] == "no_difference_observed"
     assert report["first_divergence"] is None
-    assert report["coverage"] == {"scenarios": 1, "scans": 4, "seed": 42}
+    assert report["coverage"] == {"scenarios": 1, "scans": 300, "seed": 42}
     assert report["warnings"] == []
 
 
-def test_scans_flag_turns_on_horizon_check(run_cli):
-    code, report = run_cli(TARGET_CORRECT, extra=["--scans", "300"])
+def test_scans_flag_sets_scans_per_scenario(run_cli):
+    code, report = run_cli(TARGET_CORRECT, extra=["--scans", "4"])
     assert report["status"] == "no_difference_observed"
     assert report["coverage"]["scans"] == 4
-    assert report["warnings"] == [
-        "SCAN_HORIZON: 1 of 1 scenarios ran fewer than the 300 requested scans "
-        "(run() stops at the last input event)"
-    ]
-
-
-def test_scans_flag_met_gives_no_warning(run_cli):
-    code, report = run_cli(TARGET_CORRECT, extra=["--scans", "4"])
     assert report["warnings"] == []
+
+
+def test_scans_shorter_than_last_input_event_is_needs_review(run_cli):
+    code, report = run_cli(TARGET_CORRECT, extra=["--scans", "3"])
+    assert report["status"] == "needs_review"
+    assert report["warnings"] == [
+        "INPUT_EVENT_OUTSIDE_HORIZON: explicit scans too short (legacy program)"
+    ]
 
 
 def test_unconfirmed_row_is_needs_review(run_cli):
@@ -126,30 +126,48 @@ def test_converted_seal_in_matches_legacy_after_ui_confirmation():
         rule_ids,
     )
     assert report["status"] == "no_difference_observed"
-    assert report["coverage"]["scans"] == 4
+    assert report["coverage"]["scans"] == 300
     assert report["rules_used"] == ["INPUT_MAP_V1", "OUTPUT_MAP_V1"]
 
 
-def test_converted_timer_program_is_needs_review_until_timer_gate():
-    """convert() handles TON, but the engine refuses timers until the S6 gate
-    passes. When it passes, this should become no_difference_observed."""
+TIMER_LEGACY = ("SOR XIC I:1/0 TON T4:0 0.01 50 0 EOR\n"
+                "SOR XIC T4:0/DN OTE O:2/0 EOR\n")
+
+
+def verify_converted_timer(target_text=None):
+    """convert() the timer program, confirm every proposed row, verify().
+    target_text replaces the converted target (to seed a bug)."""
     from backend.app.ir import InputEvent, TagMapping, VerifyConfig
     from backend.app.parser import parse
     from backend.app.report import verify
     from backend.app.translator import convert
 
-    legacy = parse("SOR XIC I:1/0 TON T4:0 0.01 50 0 EOR\n"
-                   "SOR XIC T4:0/DN OTE O:2/0 EOR\n")
+    legacy = parse(TIMER_LEGACY)
     target, proposed, _, unresolved = convert(legacy)
     assert unresolved == []
+    if target_text is not None:
+        target = parse(target_text)
     confirmed = [TagMapping(r.legacy_tag, r.target_tag, r.kind, r.rule,
                             f"user-confirmed · {r.evidence}") for r in proposed]
-    report = verify(legacy, target, confirmed, VerifyConfig(),
-                    input_scenarios=[[InputEvent(0, "I:1/0", 1), InputEvent(80, "I:1/0", 0)]])
-    assert report["status"] == "needs_review"
-    assert report["warnings"] == [
-        "UNVALIDATED_TON_S6: timer model is not approved yet (legacy program)"
-    ]
+    return verify(legacy, target, confirmed, VerifyConfig(),
+                  input_scenarios=[[InputEvent(0, "I:1/0", 1), InputEvent(80, "I:1/0", 0)]])
+
+
+def test_converted_timer_program_is_no_difference_observed():
+    report = verify_converted_timer()
+    assert report["status"] == "no_difference_observed"
+    assert report["coverage"]["scans"] == 300
+    assert report["warnings"] == []
+
+
+def test_unscaled_timer_preset_is_different_at_scan_6():
+    """Target keeps the SLC preset 50 but counts in ms: done after 50 ms, not 500 ms."""
+    report = verify_converted_timer("SOR XIC I_1_0 TON T4_0 50 0 EOR\n"
+                                    "SOR XIC T4_0.DN OTE O_2_0 EOR\n")
+    assert report["status"] == "different"
+    assert report["first_divergence"] == {
+        "scan": 6, "tag": "O:2/0", "legacy": 0, "target": 1, "rung": 2,
+    }
 
 
 def test_malformed_map_exits_2(run_cli):
