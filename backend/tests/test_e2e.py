@@ -130,6 +130,28 @@ def test_converted_seal_in_matches_legacy_after_ui_confirmation():
     assert report["rules_used"] == ["INPUT_MAP_V1", "OUTPUT_MAP_V1"]
 
 
+def test_converted_timer_program_is_needs_review_until_timer_gate():
+    """convert() handles TON, but the engine refuses timers until the S6 gate
+    passes. When it passes, this should become no_difference_observed."""
+    from backend.app.ir import InputEvent, TagMapping, VerifyConfig
+    from backend.app.parser import parse
+    from backend.app.report import verify
+    from backend.app.translator import convert
+
+    legacy = parse("SOR XIC I:1/0 TON T4:0 0.01 50 0 EOR\n"
+                   "SOR XIC T4:0/DN OTE O:2/0 EOR\n")
+    target, proposed, _, unresolved = convert(legacy)
+    assert unresolved == []
+    confirmed = [TagMapping(r.legacy_tag, r.target_tag, r.kind, r.rule,
+                            f"user-confirmed · {r.evidence}") for r in proposed]
+    report = verify(legacy, target, confirmed, VerifyConfig(),
+                    input_scenarios=[[InputEvent(0, "I:1/0", 1), InputEvent(80, "I:1/0", 0)]])
+    assert report["status"] == "needs_review"
+    assert report["warnings"] == [
+        "UNVALIDATED_TON_S6: timer model is not approved yet (legacy program)"
+    ]
+
+
 def test_malformed_map_exits_2(run_cli):
     code, err = run_cli(TARGET_CORRECT, tag_map=[{"legacy_tag": "I:1/0"}])
     assert code == 2

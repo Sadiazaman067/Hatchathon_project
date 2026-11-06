@@ -37,6 +37,10 @@ Owner: Tami. CONTRACT.md stays normative; this file records additions made while
 
 - `convert(program) -> (target_ir, tag_map, rule_ids, unresolved)` in `backend/app/translator.py`. All-or-nothing: if `unresolved` is not empty, `target_ir` is an empty Program and `tag_map`/`rule_ids` are empty.
 - Naming rules (no leading zeros): `I:1/0 -> I_1_0` (`INPUT_MAP_V1`), `O:2/0 -> O_2_0` (`OUTPUT_MAP_V1`). B3 and other internal bits are `UNRESOLVED_ADDRESS` in P0.
+- TON (`TON_TIMEBASE_MAP_V1`): `TON T4:0 0.01 50 0 -> TON T4_0 500 0`. Target preset in ms = legacy preset x timebase_ms (10 or 1000), exact integers, so the duration is unchanged.
+- Timer status bits (`TIMER_STATUS_MAP_V1`): `T4:0/DN -> T4_0.DN`, `T4:0/TT -> T4_0.TT`. Every TON gets both observable rows, even if no rung reads them.
+- Timer cases left unresolved: a leading-zero timer like `T4:00`, `/EN`, `/ACC`, `/PRE` (`UNRESOLVED_ADDRESS`); a DN/TT read with no TON for that timer (`UNRESOLVED_TIMER_READ`); two TONs on one timer (`UNRESOLVED_DUPLICATE_TIMER`); an OTE on a timer bit (`UNRESOLVED_TIMER_WRITE`).
+- Until the timer gate passes, verify() on any timer program returns `needs_review` (`UNVALIDATED_TON_S6` from run()).
 - `render(program)` gives the demonstration mnemonic text, one `SOR ... EOR` line per rung. `parse(render(p)) == p`.
 
 ## API wiring (for api.py)
@@ -55,7 +59,7 @@ Owner: Tami. CONTRACT.md stays normative; this file records additions made while
 - Mapping (before running): `UNCONFIRMED_MAPPING`, `AMBIGUOUS_MAPPING`, `INVALID_MAPPING_KIND`, `UNMAPPED_INPUT`, `UNMAPPED_OUTPUT`, `MISSING_OBSERVABLE`.
 - Running and comparing: `UNMAPPED_INPUT_EVENT`, `TRACE_SCAN_MISMATCH`, `NO_OBSERVABLE_MAPPINGS`, `EMPTY_TRACE`, `NO_SCENARIOS`, `SCAN_HORIZON`, plus run()'s own `NeedsReviewError` codes.
 - Parser: `PARSE_ERROR`, `UNSUPPORTED_OPCODE`, `UNSUPPORTED_NESTED_BRANCH`, `UNSUPPORTED_EMPTY_BRANCH`, `UNSUPPORTED_TIMEBASE`, `UNSUPPORTED_TIMER_ACC`.
-- Translator: `UNRESOLVED_ADDRESS`, `UNRESOLVED_INSTRUCTION`, `UNRESOLVED_INPUT_WRITE`, `UNRESOLVED_OUTPUT_READ`.
+- Translator: `UNRESOLVED_ADDRESS`, `UNRESOLVED_INSTRUCTION`, `UNRESOLVED_INPUT_WRITE`, `UNRESOLVED_OUTPUT_READ`, `UNRESOLVED_TIMER_READ`, `UNRESOLVED_TIMER_WRITE`, `UNRESOLVED_DUPLICATE_TIMER`.
 
 ## Open issues
 
