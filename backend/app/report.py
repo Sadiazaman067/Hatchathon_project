@@ -235,6 +235,18 @@ def parse_failure_report(config: VerifyConfig,
     return _report(config, "needs_review", warnings)
 
 
+def unresolved_report(config: VerifyConfig, unresolved: list[str]) -> Report:
+    """A needs_review report for a conversion that left anything unresolved.
+    The unresolved strings already start with their stable code."""
+    return _report(config, "needs_review", list(unresolved))
+
+
+def with_rules_used(report: Report, rule_ids: list[str]) -> Report:
+    """Copy of the report with rules_used filled in, for a target that came
+    from convert(). Shared by the API and the CLI."""
+    return {**report, "rules_used": list(rule_ids)}
+
+
 def _evidence(rows: list[TagMapping]) -> list[MappingEvidence]:
     return [{"legacy_tag": r.legacy_tag, "target_tag": r.target_tag, "rule": r.rule}
             for r in rows]

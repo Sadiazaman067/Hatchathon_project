@@ -108,6 +108,28 @@ def test_parse_error_is_needs_review(run_cli):
     ]
 
 
+def test_converted_seal_in_matches_legacy_after_ui_confirmation():
+    """convert() -> UI confirms every proposed row -> verify() with the real engine."""
+    from backend.app.ir import InputEvent, TagMapping, VerifyConfig
+    from backend.app.parser import parse
+    from backend.app.report import verify, with_rules_used
+    from backend.app.translator import convert
+
+    legacy = parse(LEGACY)
+    target, proposed, rule_ids, unresolved = convert(legacy)
+    assert unresolved == []
+    confirmed = [TagMapping(r.legacy_tag, r.target_tag, r.kind, r.rule,
+                            f"user-confirmed · {r.evidence}") for r in proposed]
+    events = [InputEvent(**e) for e in INPUTS]
+    report = with_rules_used(
+        verify(legacy, target, confirmed, VerifyConfig(), input_scenarios=[events]),
+        rule_ids,
+    )
+    assert report["status"] == "no_difference_observed"
+    assert report["coverage"]["scans"] == 4
+    assert report["rules_used"] == ["INPUT_MAP_V1", "OUTPUT_MAP_V1"]
+
+
 def test_malformed_map_exits_2(run_cli):
     code, err = run_cli(TARGET_CORRECT, tag_map=[{"legacy_tag": "I:1/0"}])
     assert code == 2

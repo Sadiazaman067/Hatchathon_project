@@ -241,6 +241,39 @@ def test_rung_is_null_when_two_legacy_rungs_write_the_tag(use_engine):
     assert result["first_divergence"]["rung"] is None
 
 
+def test_ui_confirmed_evidence_string_counts_as_confirmed(use_engine):
+    use_engine(correct_engine())
+    tag_map = [TagMapping(r.legacy_tag, r.target_tag, r.kind, r.rule,
+                          f"user-confirmed · proposed: {r.rule}") for r in MAP]
+    assert report.check_mappings(LEGACY, TARGET, tag_map) == []
+    assert report.verify(LEGACY, TARGET, tag_map, CONFIG,
+                         input_scenarios=[EVENTS])["status"] == "no_difference_observed"
+
+
+def test_proposed_evidence_is_not_confirmed():
+    tag_map = MAP[:2] + [row("O:2/0", "Motor", "observable", "proposed: OUTPUT_MAP_V1")]
+    assert report.check_mappings(LEGACY, TARGET, tag_map) == [
+        "UNCONFIRMED_MAPPING: O:2/0 -> Motor has evidence 'proposed: OUTPUT_MAP_V1'"
+    ]
+
+
+def test_unresolved_report():
+    result = report.unresolved_report(
+        CONFIG, ["UNRESOLVED_INSTRUCTION: rung 1: TON T4:0 is not converted yet"])
+    assert result["status"] == "needs_review"
+    assert result["warnings"] == ["UNRESOLVED_INSTRUCTION: rung 1: TON T4:0 is not converted yet"]
+    assert result["first_divergence"] is None
+
+
+def test_with_rules_used_returns_a_copy():
+    original = report.unresolved_report(CONFIG, [])
+    filled = report.with_rules_used(original, ["INPUT_MAP_V1", "OUTPUT_MAP_V1"])
+    assert filled["rules_used"] == ["INPUT_MAP_V1", "OUTPUT_MAP_V1"]
+    assert original["rules_used"] == []
+    assert {k: v for k, v in filled.items() if k != "rules_used"} == \
+           {k: v for k, v in original.items() if k != "rules_used"}
+
+
 def test_invalid_mapping_kind_is_flagged():
     bad = MAP + [TagMapping("O:2/1", "Lamp", "output", "OUTPUT_MAP_V1", "user-confirmed")]
     assert report.check_mappings(LEGACY, TARGET, bad) == [
