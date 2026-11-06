@@ -21,12 +21,23 @@ contact: "XIC" TAG  -> xic
        | "XIO" TAG  -> xio
 
 // At least one output instruction per rung.
-outputs: ote+
+outputs: output+
+
+?output: ote
+       | ton
 
 ote: "OTE" TAG
 
+// The grammar accepts any count of numeric fields. parser.py checks them
+// against the timer name: SLC address T4:0 -> legacy `TON T4:0 <timebase s> <PRE> <ACC>`,
+// tag name Timer0 -> target `TON Timer0 <PRE ms> <ACC>`.
+ton: "TON" TAG NUMBER*
+
 // Legacy SLC addresses (I:1/0, O:2/0, T4:0/DN) and Logix tag names (Start, Timer0.DN).
 TAG: /[A-Za-z_][A-Za-z0-9_:\/.]*/
+
+// Kept loose on purpose (negatives, decimals) so parser.py can give a clear message.
+NUMBER: /-?[0-9]+(\.[0-9]+)?/
 
 %import common.WS
 %ignore WS

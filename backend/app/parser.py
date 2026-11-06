@@ -7,12 +7,14 @@ ever silently dropped.
 from __future__ import annotations
 
 import re
+from decimal import Decimal
 
 from lark import Lark, Transformer, UnexpectedInput, UnexpectedToken
 from lark.exceptions import VisitError
 
 from backend.app.ir import (
     OTE,
+    TON,
     Contact,
     Parallel,
     ParseDiagnostic,
@@ -34,13 +36,81 @@ NESTED_BRANCH_MSG = "nested branch (BST inside a branch) is not supported"
 EMPTY_BRANCH_MSG = "empty branch path (always-true shorted wire) is not supported"
 
 
-class _Unsupported(Exception):
-    """Valid ladder that P0 does not support. Becomes an UNSUPPORTED_* diagnostic."""
+# Timer names decide the TON form (team decision, step 4).
+_SLC_TIMER = re.compile(r"T[0-9]+:[0-9]+")          # T4:0 -> legacy form
+_LOGIX_TAG = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")  # Timer0 -> target form
+_UINT = re.compile(r"[0-9]+")
+
+# SLC timebase in seconds (exact decimal) -> milliseconds.
+_SLC_TIMEBASES = {Decimal("0.01"): 10, Decimal("1"): 1000}
+SLC_MAX_PRESET = 32767
+
+
+class _RungError(Exception):
+    """A problem found while building the IR for one rung. Becomes a
+    ParseDiagnostic: UNSUPPORTED_* for valid-but-unsupported ladder,
+    PARSE_ERROR for invalid ladder."""
 
     def __init__(self, code: str, message: str):
         super().__init__(message)
         self.code = code
         self.message = message
+
+
+def _uint_field(text: str, what: str) -> int:
+    if not _UINT.fullmatch(text):
+        raise _RungError(
+            "PARSE_ERROR", f"TON {what} must be a non-negative integer, got '{text}'"
+        )
+    return int(text)
+
+
+def _build_ton(timer: str, fields: list[str]) -> TON:
+    """Check a TON's fields against its form and convert them to the IR."""
+    if _SLC_TIMER.fullmatch(timer):
+        if len(fields) != 3:
+            raise _RungError(
+                "PARSE_ERROR",
+                f"TON {timer} is an SLC timer address, so it needs the legacy form "
+                f"TON <timer> <timebase> <preset> <acc> (got {len(fields)} numbers)",
+            )
+        timebase_text, preset_text, acc_text = fields
+        timebase_ms = _SLC_TIMEBASES.get(Decimal(timebase_text))
+        if timebase_ms is None:
+            raise _RungError(
+                "UNSUPPORTED_TIMEBASE",
+                f"TON timebase '{timebase_text}' s is not supported (only 0.01 and 1.0)",
+            )
+        preset = _uint_field(preset_text, "preset")
+        if preset > SLC_MAX_PRESET:
+            raise _RungError(
+                "PARSE_ERROR",
+                f"TON preset {preset} is above the SLC maximum of {SLC_MAX_PRESET}",
+            )
+    elif _LOGIX_TAG.fullmatch(timer):
+        if len(fields) != 2:
+            raise _RungError(
+                "PARSE_ERROR",
+                f"TON {timer} is a tag name, so it needs the target form "
+                f"TON <timer> <preset> <acc> (got {len(fields)} numbers)",
+            )
+        preset_text, acc_text = fields
+        preset = _uint_field(preset_text, "preset")
+        timebase_ms = 1
+    else:
+        raise _RungError(
+            "PARSE_ERROR",
+            f"TON timer '{timer}' is neither an SLC timer address (like T4:0) "
+            f"nor a tag name (like Timer0)",
+        )
+
+    acc = _uint_field(acc_text, "accumulator")
+    if acc != 0:
+        raise _RungError(
+            "UNSUPPORTED_TIMER_ACC",
+            f"TON accumulator must be 0 (timers are modeled from zero), got {acc}",
+        )
+    return TON(timer=timer, preset=preset, timebase_ms=timebase_ms)
 
 
 class _ToIR(Transformer):
@@ -57,9 +127,9 @@ class _ToIR(Transformer):
 
     def path(self, items):
         if not items:
-            raise _Unsupported("UNSUPPORTED_EMPTY_BRANCH", EMPTY_BRANCH_MSG)
+            raise _RungError("UNSUPPORTED_EMPTY_BRANCH", EMPTY_BRANCH_MSG)
         if any(isinstance(node, Parallel) for node in items):
-            raise _Unsupported("UNSUPPORTED_NESTED_BRANCH", NESTED_BRANCH_MSG)
+            raise _RungError("UNSUPPORTED_NESTED_BRANCH", NESTED_BRANCH_MSG)
         # Every branch path is a Series, even with one contact (team decision).
         return Series(nodes=list(items))
 
@@ -68,6 +138,10 @@ class _ToIR(Transformer):
 
     def ote(self, items):
         return OTE(tag=str(items[0]))
+
+    def ton(self, items):
+        timer, *fields = items
+        return _build_ton(str(timer), [str(f) for f in fields])
 
     def outputs(self, items):
         return list(items)
@@ -117,7 +191,7 @@ def parse(source_text: str) -> Program | list[ParseDiagnostic]:
             condition, outputs = _ToIR().transform(tree)
         except VisitError as error:
             # Lark wraps exceptions raised inside the transformer; unwrap ours.
-            if not isinstance(error.orig_exc, _Unsupported):
+            if not isinstance(error.orig_exc, _RungError):
                 raise
             diagnostics.append(ParseDiagnostic(
                 line_no, error.orig_exc.code, error.orig_exc.message
