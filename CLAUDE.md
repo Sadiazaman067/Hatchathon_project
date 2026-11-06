@@ -2,6 +2,13 @@
 
 Read this whole file before writing code. If a request conflicts with this file, stop and ask.
 
+## Team workflow (inbox, pulling, pushing)
+
+- Before starting, run git pull, then read docs/inbox/<your name>.md and docs/inbox/everyone.md and tell your user about any notes.
+- Leave a note for a teammate by adding it to the top of their inbox file. Don't edit someone else's notes.
+- Run git pull before every push. Push after every passing step.
+- CONTRACT.md, CLAUDE.md and backend/app/ir.py change only through Tami; ask in docs/inbox/tami.md. requirements.txt: anyone may add a line, after pulling.
+
 ## What we are building
 
 LadderProof is a behavior checker for legacy-to-Logix PLC migrations. Input: an old Allen-Bradley SLC 500 ladder program (mnemonic text) and a converted Logix version (from our rule translator, an AI, or a person). LadderProof runs both on the same input sequences in a simulated scan cycle and reports the first scan where observable outputs differ, with a replayable input trace.

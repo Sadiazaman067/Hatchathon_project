@@ -1,0 +1,11 @@
+# Inbox: Sadia
+
+Newest notes at the top. Add new notes above older ones; don't edit someone else's notes.
+Each note: at most 2 lines, plain English, action first. Details live in docs/interfaces.md.
+
+---
+
+- **2026-11-06 · Tami:** Please push the seal-in fixtures to main.
+- **2026-11-06 · Tami:** Use only I:, O: and T4: addresses in fixtures. B3 and other internal bits are unsupported.
+- **2026-11-06 · Tami:** Swapped-output-tag bug: the expected result is needs_review with a MISSING_OBSERVABLE warning naming the tag, not different. Put that in the answer key.
+- **2026-11-06 · Tami:** Follow "Fixture formats" in [docs/interfaces.md](../interfaces.md), and tell Tami the file names so test_e2e.py can use them.
