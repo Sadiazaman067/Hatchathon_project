@@ -1,0 +1,2 @@
+SOR XIC Pump OTE RunLight EOR
+SOR BST XIC Start NXB XIC Pump BND XIO Stop XIC Guard OTE Pump EOR

@@ -1,0 +1,32 @@
+[
+  {
+    "scan": 0,
+    "tag": "I:1/0",
+    "value": 1
+  },
+  {
+    "scan": 0,
+    "tag": "I:1/1",
+    "value": 0
+  },
+  {
+    "scan": 2,
+    "tag": "I:1/0",
+    "value": 0
+  },
+  {
+    "scan": 3,
+    "tag": "I:1/1",
+    "value": 1
+  },
+  {
+    "scan": 4,
+    "tag": "I:1/1",
+    "value": 0
+  },
+  {
+    "scan": 6,
+    "tag": "I:1/1",
+    "value": 0
+  }
+]

@@ -1,0 +1,7 @@
+{
+  "status": "needs_review",
+  "warning_codes": [
+    "MISSING_OBSERVABLE"
+  ],
+  "note": "target writes Conveyor instead of Motor; Motor is never written"
+}

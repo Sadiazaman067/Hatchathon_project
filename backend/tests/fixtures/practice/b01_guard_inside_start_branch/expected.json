@@ -1,0 +1,10 @@
+{
+  "status": "different",
+  "first_divergence": {
+    "scan": 4,
+    "tag": "O:2/0",
+    "legacy": 0,
+    "target": 1,
+    "rung": 1
+  }
+}

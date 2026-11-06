@@ -1,0 +1,30 @@
+[
+  {
+    "legacy_tag": "I:1/0",
+    "target_tag": "Start",
+    "kind": "input",
+    "rule": "INPUT_MAP_V1",
+    "evidence": "user-confirmed"
+  },
+  {
+    "legacy_tag": "O:2/0",
+    "target_tag": "Motor",
+    "kind": "observable",
+    "rule": "OUTPUT_MAP_V1",
+    "evidence": "user-confirmed"
+  },
+  {
+    "legacy_tag": "T4:0/DN",
+    "target_tag": "T4_0.DN",
+    "kind": "observable",
+    "rule": "TIMER_STATUS_MAP_V1",
+    "evidence": "user-confirmed"
+  },
+  {
+    "legacy_tag": "T4:0/TT",
+    "target_tag": "T4_0.TT",
+    "kind": "observable",
+    "rule": "TIMER_STATUS_MAP_V1",
+    "evidence": "user-confirmed"
+  }
+]

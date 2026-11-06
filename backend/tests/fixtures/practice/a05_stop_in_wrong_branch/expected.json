@@ -1,0 +1,11 @@
+{
+  "status": "different",
+  "first_divergence": {
+    "scan": 1,
+    "tag": "O:2/0",
+    "legacy": 0,
+    "target": 1,
+    "rung": 1
+  },
+  "note": "Stop only guards the seal path, so holding Start overrides Stop. Needs Start and Stop pressed together; the standard seal-in inputs miss it."
+}

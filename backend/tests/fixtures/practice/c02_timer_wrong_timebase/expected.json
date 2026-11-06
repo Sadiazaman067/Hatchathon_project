@@ -1,0 +1,17 @@
+{
+  "status": "needs_review",
+  "warning_codes": [
+    "UNVALIDATED_TON_S6"
+  ],
+  "note": "Timer gate not passed yet: today verify() must return needs_review (UNVALIDATED_TON_S6). Under PROPOSED S6 the expected first difference is shown in 'after_timer_gate'; recompute if Arnav changes S6.",
+  "after_timer_gate": {
+    "status": "different",
+    "first_divergence": {
+      "scan": 51,
+      "tag": "O:2/0",
+      "legacy": 1,
+      "target": 0,
+      "rung": 2
+    }
+  }
+}
