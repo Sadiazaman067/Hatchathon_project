@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@import "./styles/tokens.css";
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  background-color: var(--paper);
+  /* Grid paper, from DESIGN.md section 3 */
+  background-image:
+    linear-gradient(var(--hair-2) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hair-2) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Keyboard focus: 2px ink outline (DESIGN.md section 9) */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
