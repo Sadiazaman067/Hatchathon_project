@@ -251,9 +251,17 @@ def _horizon_warning(short: int, scenarios: int, wanted: int) -> list[str]:
 
 def verify(legacy_ir: Program, target_ir: Program, tag_map: list[TagMapping],
            config: VerifyConfig, *,
-           input_scenarios: list[list[InputEvent]] | None = None) -> Report:
+           input_scenarios: list[list[InputEvent]] | None = None,
+           check_horizon: bool | None = None) -> Report:
     """Run both programs on identical inputs and report the first difference.
-    input_scenarios=None uses Arnav's generate_scenarios with the config."""
+
+    input_scenarios=None uses Arnav's generate_scenarios with the config.
+    check_horizon: warn (SCAN_HORIZON) when a scenario ran fewer than
+    config.scans scans. None means: only when verify() generated the scenarios,
+    because passed-in scenarios carry no requested scan count."""
+    if check_horizon is None:
+        check_horizon = input_scenarios is None
+
     problems = check_mappings(legacy_ir, target_ir, tag_map)
     if problems:
         return _report(config, "needs_review", problems)
@@ -292,7 +300,7 @@ def verify(legacy_ir: Program, target_ir: Program, tag_map: list[TagMapping],
 
         scenarios_run += 1
         scans_run += len(legacy_trace)
-        short += len(legacy_trace) < config.scans
+        short += check_horizon and len(legacy_trace) < config.scans
 
         if divergence is not None:
             tag = divergence["tag"]

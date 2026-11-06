@@ -34,7 +34,7 @@ INPUTS = [
 
 @pytest.fixture
 def run_cli(tmp_path, capsys):
-    def go(target_text, tag_map=TAG_MAP, legacy_text=LEGACY, inputs=INPUTS):
+    def go(target_text, tag_map=TAG_MAP, legacy_text=LEGACY, inputs=INPUTS, extra=()):
         files = {
             "legacy.txt": legacy_text, "target.txt": target_text,
             "tag_map.json": json.dumps(tag_map), "inputs.json": json.dumps(inputs),
@@ -45,7 +45,7 @@ def run_cli(tmp_path, capsys):
             "verify", "--legacy", str(tmp_path / "legacy.txt"),
             "--target", str(tmp_path / "target.txt"),
             "--map", str(tmp_path / "tag_map.json"),
-            "--inputs", str(tmp_path / "inputs.json"),
+            "--inputs", str(tmp_path / "inputs.json"), *extra,
         ])
         out = capsys.readouterr()
         return code, (json.loads(out.out) if code == 0 else out.err)
@@ -63,6 +63,7 @@ def test_flipped_stop_is_different_at_scan_1(run_cli):
         {"scan": 0, "tag": "I:1/0", "value": 1},
         {"scan": 0, "tag": "I:1/1", "value": 0},
     ]
+    assert report["warnings"] == []
 
 
 def test_correct_target_is_no_difference_observed(run_cli):
@@ -71,6 +72,22 @@ def test_correct_target_is_no_difference_observed(run_cli):
     assert report["status"] == "no_difference_observed"
     assert report["first_divergence"] is None
     assert report["coverage"] == {"scenarios": 1, "scans": 4, "seed": 42}
+    assert report["warnings"] == []
+
+
+def test_scans_flag_turns_on_horizon_check(run_cli):
+    code, report = run_cli(TARGET_CORRECT, extra=["--scans", "300"])
+    assert report["status"] == "no_difference_observed"
+    assert report["coverage"]["scans"] == 4
+    assert report["warnings"] == [
+        "SCAN_HORIZON: 1 of 1 scenarios ran fewer than the 300 requested scans "
+        "(run() stops at the last input event)"
+    ]
+
+
+def test_scans_flag_met_gives_no_warning(run_cli):
+    code, report = run_cli(TARGET_CORRECT, extra=["--scans", "4"])
+    assert report["warnings"] == []
 
 
 def test_unconfirmed_row_is_needs_review(run_cli):

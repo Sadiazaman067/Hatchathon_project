@@ -126,16 +126,32 @@ def test_correct_target_is_no_difference_observed(use_engine):
     assert len(result["mapping_evidence"]) == 3
 
 
-def test_scan_horizon_warning_when_fewer_scans_ran(use_engine):
+LONG = VerifyConfig(seed=7, scenarios=1, scans=300, dt_ms=10)
+HORIZON_1_OF_1 = ("SCAN_HORIZON: 1 of 1 scenarios ran fewer than the 300 requested "
+                  "scans (run() stops at the last input event)")
+
+
+def test_passed_in_scenarios_have_no_horizon_check_by_default(use_engine):
     use_engine(correct_engine())
-    config = VerifyConfig(seed=7, scenarios=1, scans=300, dt_ms=10)
-    result = report.verify(LEGACY, TARGET, MAP, config, input_scenarios=[EVENTS])
+    result = report.verify(LEGACY, TARGET, MAP, LONG, input_scenarios=[EVENTS])
     assert result["status"] == "no_difference_observed"
     assert result["coverage"]["scans"] == 2
-    assert result["warnings"] == [
-        "SCAN_HORIZON: 1 of 1 scenarios ran fewer than the 300 requested scans "
-        "(run() stops at the last input event)"
-    ]
+    assert result["warnings"] == []
+
+
+def test_passed_in_scenarios_horizon_check_on_request(use_engine):
+    use_engine(correct_engine())
+    result = report.verify(LEGACY, TARGET, MAP, LONG, input_scenarios=[EVENTS],
+                           check_horizon=True)
+    assert result["coverage"]["scans"] == 2
+    assert result["warnings"] == [HORIZON_1_OF_1]
+
+
+def test_generated_scenarios_that_ran_short_warn(use_engine):
+    engine = use_engine(correct_engine())
+    engine.generated = [EVENTS]
+    result = report.verify(LEGACY, TARGET, MAP, LONG)
+    assert result["warnings"] == [HORIZON_1_OF_1]
 
 
 def test_none_scenarios_uses_generator_with_config(use_engine):
