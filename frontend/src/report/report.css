@@ -1,0 +1,32 @@
+/* Report motion (DESIGN.md section 6). CSS only; reduced motion shows the final state. */
+.lp-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: lp-draw 600ms ease-out forwards;
+}
+
+.lp-fade {
+  opacity: 0;
+  animation: lp-fade 150ms ease-out 600ms forwards;
+}
+
+@keyframes lp-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes lp-fade {
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-draw,
+  .lp-fade {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}

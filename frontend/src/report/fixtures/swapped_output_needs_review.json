@@ -1,0 +1,26 @@
+{
+  "status": "needs_review",
+  "coverage": {
+    "scenarios": 0,
+    "scans": 0,
+    "seed": 42
+  },
+  "assumptions": {
+    "dt_ms": 10,
+    "executed_scan_index": "1_based",
+    "profiles": [
+      "slc_subset_v1",
+      "logix_subset_v1"
+    ]
+  },
+  "first_divergence": null,
+  "mapping_evidence": [],
+  "counterexample": [],
+  "rules_used": [],
+  "warnings": [
+    "UNMAPPED_INPUT: target reads Motor with no input mapping",
+    "MISSING_OBSERVABLE: target never writes Motor (mapped from O:2/0)",
+    "UNMAPPED_OUTPUT: target writes Conveyor with no observable mapping"
+  ],
+  "trace_window": null
+}
