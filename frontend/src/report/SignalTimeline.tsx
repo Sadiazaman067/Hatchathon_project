@@ -166,7 +166,7 @@ export default function SignalTimeline({ report }: { report: Report }) {
       {before.length > 0 && (
         <p className="m-0 font-mono text-[12px] text-muted">
           Inputs before scan {window.start_scan}:{" "}
-          {before.map((e) => `scan ${e.scan} · ${e.tag} = ${e.value}`).join("   ")}
+          {before.map((e) => `scan ${e.scan}: ${e.tag} = ${e.value}`).join(" · ")}
         </p>
       )}
       {first && (

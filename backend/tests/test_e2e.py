@@ -198,6 +198,17 @@ def test_ai_demo_unscaled_preset_is_different_at_scan_21(capsys):
     assert report["first_divergence"] == {
         "scan": 21, "tag": "O:2/0", "legacy": 0, "target": 1, "rung": 4,
     }
+    # Divergent observable first, then every other observable in trace_window,
+    # then the inputs used in the counterexample.
+    assert [(m["legacy_tag"], m["target_tag"]) for m in report["mapping_evidence"]] == [
+        ("O:2/0", "Conveyor_Motor"),
+        ("O:2/1", "Run_Light"),
+        ("O:2/2", "Warning_Horn"),
+        ("T4:0/DN", "StartDelay.DN"),
+        ("T4:0/TT", "StartDelay.TT"),
+        ("I:1/0", "Start_PB"),
+        ("I:1/1", "Stop_PB"),
+    ]
 
 
 def test_malformed_map_exits_2(run_cli):

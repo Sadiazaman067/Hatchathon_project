@@ -2,10 +2,11 @@ import { plural, targetName, type Report } from "./types";
 
 export const NOT_A_PROOF = "Tested scenarios only. Not a proof of equivalence.";
 
+// Solid status fill with sheet-colored text (the near-white token; no hex outside tokens.css).
 const TAG_STYLE = {
-  different: { word: "DIFFERENT", className: "border-red text-red" },
-  needs_review: { word: "NEEDS REVIEW", className: "border-amber text-amber-text bg-amber-tint" },
-  no_difference_observed: { word: "NO DIFFERENCE OBSERVED", className: "border-green text-green" },
+  different: { word: "DIFFERENT", className: "border-red bg-red text-sheet" },
+  needs_review: { word: "NEEDS REVIEW", className: "border-amber bg-amber text-sheet" },
+  no_difference_observed: { word: "NO DIFFERENCE OBSERVED", className: "border-green bg-green text-sheet" },
 } as const;
 
 export function StatusTag({ status }: { status: Report["status"] }) {

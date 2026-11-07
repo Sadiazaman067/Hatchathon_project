@@ -27,6 +27,26 @@
       "rule": "OUTPUT_MAP_V1"
     },
     {
+      "legacy_tag": "O:2/1",
+      "target_tag": "Run_Light",
+      "rule": "OUTPUT_MAP_V1"
+    },
+    {
+      "legacy_tag": "O:2/2",
+      "target_tag": "Warning_Horn",
+      "rule": "OUTPUT_MAP_V1"
+    },
+    {
+      "legacy_tag": "T4:0/DN",
+      "target_tag": "StartDelay.DN",
+      "rule": "TIMER_STATUS_MAP_V1"
+    },
+    {
+      "legacy_tag": "T4:0/TT",
+      "target_tag": "StartDelay.TT",
+      "rule": "TIMER_STATUS_MAP_V1"
+    },
+    {
       "legacy_tag": "I:1/0",
       "target_tag": "Start_PB",
       "rule": "INPUT_MAP_V1"
