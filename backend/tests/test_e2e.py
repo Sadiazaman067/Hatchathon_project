@@ -215,3 +215,21 @@ def test_malformed_map_exits_2(run_cli):
     code, err = run_cli(TARGET_CORRECT, tag_map=[{"legacy_tag": "I:1/0"}])
     assert code == 2
     assert err.startswith("error: tag map entry 0 must have exactly the keys")
+
+
+NEEDS_REVIEW_DEMO = Path(__file__).resolve().parents[2] / "demo" / "needs_review"
+
+
+def test_needs_review_demo_reports_unsupported_osr(capsys):
+    code = cli.main([
+        "verify", "--legacy", str(NEEDS_REVIEW_DEMO / "legacy.txt"),
+        "--target", str(NEEDS_REVIEW_DEMO / "target.txt"),
+        "--map", str(NEEDS_REVIEW_DEMO / "tag_map.json"),
+        "--inputs", str(NEEDS_REVIEW_DEMO / "inputs.json"),
+    ])
+    assert code == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["status"] == "needs_review"
+    assert report["warnings"] == [
+        "UNSUPPORTED_OPCODE: target line 1: unsupported instruction 'OSR' at column 46"
+    ]

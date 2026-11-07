@@ -1,0 +1,23 @@
+[
+  {
+    "legacy_tag": "I:1/0",
+    "target_tag": "Start",
+    "kind": "input",
+    "rule": "INPUT_MAP_V1",
+    "evidence": "user-confirmed"
+  },
+  {
+    "legacy_tag": "I:1/1",
+    "target_tag": "Stop",
+    "kind": "input",
+    "rule": "INPUT_MAP_V1",
+    "evidence": "user-confirmed"
+  },
+  {
+    "legacy_tag": "O:2/0",
+    "target_tag": "Motor",
+    "kind": "observable",
+    "rule": "OUTPUT_MAP_V1",
+    "evidence": "user-confirmed"
+  }
+]

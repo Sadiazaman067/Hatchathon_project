@@ -55,7 +55,9 @@ Same folder, target `target_ai.txt`.
 
 ## 7. needs_review case
 
-- [ ] UI: upload `backend/tests/fixtures/practice/b04_unsupported_opcode/legacy.txt` and `target.txt`. Expected: target diagnostic on line 2, `UNSUPPORTED_OPCODE`, "unsupported instruction 'OSR' at column 14"; verify gives **NEEDS REVIEW** (amber) with that warning.
+Files: `frontend/public/demo/needs_review/` (`legacy.txt`, `target.txt`, `tag_map.json`): the seal-in with one OSR added to the target.
+
+- [ ] UI: upload both files. Expected: legacy 1 rung; target 0 rungs with one diagnostic on line 1, `UNSUPPORTED_OPCODE`, "unsupported instruction 'OSR' at column 46"; verify gives **NEEDS REVIEW** (amber) with that warning.
 - [ ] Unconfirmed map: on any demo, try to run with a row unconfirmed. Expected: Run stays disabled with the reason shown.
 
 ## 8. CLI fallback (if the UI fails, the demo runs here)
@@ -74,9 +76,9 @@ Run from the repo root. Each prints the report JSON.
   ```
   python -m backend.app.cli verify --legacy demo/ai_conversion/legacy.txt --target demo/ai_conversion/target_ai.txt --map demo/ai_conversion/tag_map.json --inputs demo/ai_conversion/inputs.json
   ```
-- [ ] needs_review. Expected: `needs_review`, `UNSUPPORTED_OPCODE: target line 2: unsupported instruction 'OSR' at column 14`.
+- [ ] needs_review. Expected: `needs_review`, `UNSUPPORTED_OPCODE: target line 1: unsupported instruction 'OSR' at column 46`.
   ```
-  python -m backend.app.cli verify --legacy backend/tests/fixtures/practice/b04_unsupported_opcode/legacy.txt --target backend/tests/fixtures/practice/b04_unsupported_opcode/target.txt --map backend/tests/fixtures/practice/b04_unsupported_opcode/tag_map.json --inputs backend/tests/fixtures/practice/b04_unsupported_opcode/inputs.json
+  python -m backend.app.cli verify --legacy demo/needs_review/legacy.txt --target demo/needs_review/target.txt --map demo/needs_review/tag_map.json --inputs demo/needs_review/inputs.json
   ```
 - [ ] Report screen preview with saved reports (no API needed): http://localhost:5173/report-preview.html
 
