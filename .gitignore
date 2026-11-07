@@ -19,6 +19,7 @@ node_modules/
 dist/
 
 # Local outputs
+data/
 results/*.json
 !results/.gitkeep
 .DS_Store

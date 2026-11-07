@@ -5,6 +5,8 @@ Each note: at most 2 lines, plain English, action first. Details live in docs/in
 
 ---
 
+- **2026-11-06 · Tami:** api.py is done (Tami). You only need to build the UI and call these endpoints; the run command is in docs/interfaces.md.
+- **2026-11-06 · Tami:** Upload response now also has `target_rung_count` and `target_diagnostics` (CONTRACT §9 changelog). Show target errors from those.
 - **2026-11-06 · Tami:** Run git pull, then pip install -r requirements.txt.
 - **2026-11-06 · Tami:** Wire /convert and /verify as described in "API wiring" in [docs/interfaces.md](../interfaces.md).
 - **2026-11-06 · Tami:** When the user confirms a tag-map row, set its evidence to `user-confirmed · proposed: <RULE_ID>`. Converted target names are confirm-only in v1.

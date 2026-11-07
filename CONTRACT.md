@@ -251,14 +251,14 @@ All endpoints use prefix `/api` and JSON request/response bodies. **The browser 
 
 | Method | Endpoint | Request JSON | 200 response JSON | Owner |
 |---|---|---|---|---|
-| POST | `/api/projects` | `{ "legacy_text": str, "target_text": str|null }` | `{ "project_id": str, "rung_count": int, "diagnostics": [ParseDiagnostic] }` | Adaora |
+| POST | `/api/projects` | `{ "legacy_text": str, "target_text": str|null }` | `{ "project_id": str, "rung_count": int, "diagnostics": [ParseDiagnostic], "target_rung_count": int, "target_diagnostics": [ParseDiagnostic] }` | Adaora |
 | POST | `/api/projects/{id}/convert` | `{}` | `{ "converted_text": str, "tag_map": [TagMapping], "rule_ids": [str], "unresolved": [str] }` | Adaora |
 | POST | `/api/projects/{id}/verify` | `{ "seed":42, "scenarios":200, "scans":300, "dt_ms":10, "tag_map":[TagMapping], "confirmed_tag_map":true }` | `Report` (§8) | Adaora |
 | GET | `/api/projects/{id}/report` | none | Most recent `Report` | Adaora |
 
 **Endpoint behavior:**
 
-- `POST /api/projects` stores original text and optional converted text under a generated project ID. `rung_count` is parsed legacy rung count; `diagnostics` is empty for supported input. If syntax is unsupported, keep diagnostics and prevent an unqualified pass during verification.
+- `POST /api/projects` stores original text and optional converted text under a generated project ID. `rung_count` and `diagnostics` are for the legacy program; `target_rung_count` and `target_diagnostics` for the uploaded target (0 and `[]` when there is none). Rung counts are 0 when that program has diagnostics; `diagnostics` is empty for supported input. If syntax is unsupported, keep diagnostics and prevent an unqualified pass during verification.
 - `POST /convert` calls Tami's `parse()`/`convert()` and stores the target IR/text and proposed `tag_map`; if a user-uploaded target exists, the endpoint is **optional**, not implicitly called or used to overwrite it. The UI explicitly asks before replacing a target.
 - `POST /verify` requires a user-confirmed mapping list. This is how the **existing endpoint** supports map editing; **no fifth endpoint**. If `confirmed_tag_map` is false/missing or required tags are ambiguous, respond with `needs_review` + warnings, not a fabricated match.
 - `GET /report` returns `404` if no report was generated yet. Project not found is `404`; malformed JSON/schema is `422`; unexpected server faults are `500` with no stack traces in the UI. Unsupported **PLC semantics** are valid application outcomes (`needs_review`) rather than server crashes.
@@ -331,3 +331,7 @@ These refine omissions in the uploaded plans and current `CLAUDE.md`. They are *
 | Timer first-enabled scan behavior requires an independent golden gate | Prevents invented `scan=5`/`scan=51` examples from becoming code | Arnav, Tami |
 
 **Acceptance standard:** active teammates mark sign-off and implement the fixtures before treating this document as frozen. The contract is designed to avoid late integration changes, but it cannot guarantee zero changes if a tested technical assumption proves wrong.
+
+## Changelog
+
+- 2026-11-06 (Tami, approved by Tami): §9 `POST /api/projects` response adds `target_rung_count` and `target_diagnostics` (additive).
