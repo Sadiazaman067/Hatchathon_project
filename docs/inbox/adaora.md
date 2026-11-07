@@ -5,6 +5,7 @@ Each note: at most 2 lines, plain English, action first. Details live in docs/in
 
 ---
 
+- **2026-11-07 · Tami:** src/api/client.ts and public/demo/ are ready to use for Upload and Tag map.
 - **2026-11-07 · Tami:** ReportScreen is ready in src/report/ReportScreen.tsx: render <ReportScreen report={report} /> inside DrawingSheet with the JSON from /verify.
 - **2026-11-06 · Tami:** Use `demo/ai_conversion/` as the AI demo program in the UI (Stretch 1, recorded AI conversion). `target_ai.txt` gives no_difference_observed; `target_ai_unscaled_example.txt` gives different at scan 21. See its README.
 - **2026-11-06 · Tami:** api.py is done (Tami). You only need to build the UI and call these endpoints; the run command is in docs/interfaces.md.
