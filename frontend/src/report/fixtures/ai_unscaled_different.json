@@ -1,0 +1,307 @@
+{
+  "status": "different",
+  "coverage": {
+    "scenarios": 1,
+    "scans": 300,
+    "seed": 42
+  },
+  "assumptions": {
+    "dt_ms": 10,
+    "executed_scan_index": "1_based",
+    "profiles": [
+      "slc_subset_v1",
+      "logix_subset_v1"
+    ]
+  },
+  "first_divergence": {
+    "scan": 21,
+    "tag": "O:2/0",
+    "legacy": 0,
+    "target": 1,
+    "rung": 4
+  },
+  "mapping_evidence": [
+    {
+      "legacy_tag": "O:2/0",
+      "target_tag": "Conveyor_Motor",
+      "rule": "OUTPUT_MAP_V1"
+    },
+    {
+      "legacy_tag": "O:2/1",
+      "target_tag": "Run_Light",
+      "rule": "OUTPUT_MAP_V1"
+    },
+    {
+      "legacy_tag": "O:2/2",
+      "target_tag": "Warning_Horn",
+      "rule": "OUTPUT_MAP_V1"
+    },
+    {
+      "legacy_tag": "T4:0/DN",
+      "target_tag": "StartDelay.DN",
+      "rule": "TIMER_STATUS_MAP_V1"
+    },
+    {
+      "legacy_tag": "T4:0/TT",
+      "target_tag": "StartDelay.TT",
+      "rule": "TIMER_STATUS_MAP_V1"
+    },
+    {
+      "legacy_tag": "I:1/0",
+      "target_tag": "Start_PB",
+      "rule": "INPUT_MAP_V1"
+    },
+    {
+      "legacy_tag": "I:1/1",
+      "target_tag": "Stop_PB",
+      "rule": "INPUT_MAP_V1"
+    }
+  ],
+  "counterexample": [
+    {
+      "scan": 0,
+      "tag": "I:1/0",
+      "value": 1
+    },
+    {
+      "scan": 0,
+      "tag": "I:1/1",
+      "value": 0
+    },
+    {
+      "scan": 5,
+      "tag": "I:1/0",
+      "value": 0
+    }
+  ],
+  "rules_used": [],
+  "warnings": [],
+  "trace_window": {
+    "start_scan": 16,
+    "end_scan": 26,
+    "legacy": [
+      {
+        "scan": 16,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      },
+      {
+        "scan": 17,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      },
+      {
+        "scan": 18,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      },
+      {
+        "scan": 19,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      },
+      {
+        "scan": 20,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      },
+      {
+        "scan": 21,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      },
+      {
+        "scan": 22,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      },
+      {
+        "scan": 23,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      },
+      {
+        "scan": 24,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      },
+      {
+        "scan": 25,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      },
+      {
+        "scan": 26,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      }
+    ],
+    "target": [
+      {
+        "scan": 16,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      },
+      {
+        "scan": 17,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      },
+      {
+        "scan": 18,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      },
+      {
+        "scan": 19,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      },
+      {
+        "scan": 20,
+        "observables": {
+          "O:2/0": 0,
+          "O:2/1": 1,
+          "O:2/2": 1,
+          "T4:0/DN": 0,
+          "T4:0/TT": 1
+        }
+      },
+      {
+        "scan": 21,
+        "observables": {
+          "O:2/0": 1,
+          "O:2/1": 1,
+          "O:2/2": 0,
+          "T4:0/DN": 1,
+          "T4:0/TT": 0
+        }
+      },
+      {
+        "scan": 22,
+        "observables": {
+          "O:2/0": 1,
+          "O:2/1": 1,
+          "O:2/2": 0,
+          "T4:0/DN": 1,
+          "T4:0/TT": 0
+        }
+      },
+      {
+        "scan": 23,
+        "observables": {
+          "O:2/0": 1,
+          "O:2/1": 1,
+          "O:2/2": 0,
+          "T4:0/DN": 1,
+          "T4:0/TT": 0
+        }
+      },
+      {
+        "scan": 24,
+        "observables": {
+          "O:2/0": 1,
+          "O:2/1": 1,
+          "O:2/2": 0,
+          "T4:0/DN": 1,
+          "T4:0/TT": 0
+        }
+      },
+      {
+        "scan": 25,
+        "observables": {
+          "O:2/0": 1,
+          "O:2/1": 1,
+          "O:2/2": 0,
+          "T4:0/DN": 1,
+          "T4:0/TT": 0
+        }
+      },
+      {
+        "scan": 26,
+        "observables": {
+          "O:2/0": 1,
+          "O:2/1": 1,
+          "O:2/2": 0,
+          "T4:0/DN": 1,
+          "T4:0/TT": 0
+        }
+      }
+    ]
+  }
+}

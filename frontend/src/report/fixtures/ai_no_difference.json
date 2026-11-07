@@ -1,0 +1,58 @@
+{
+  "status": "no_difference_observed",
+  "coverage": {
+    "scenarios": 3,
+    "scans": 900,
+    "seed": 42
+  },
+  "assumptions": {
+    "dt_ms": 10,
+    "executed_scan_index": "1_based",
+    "profiles": [
+      "slc_subset_v1",
+      "logix_subset_v1"
+    ]
+  },
+  "first_divergence": null,
+  "mapping_evidence": [
+    {
+      "legacy_tag": "I:1/0",
+      "target_tag": "Start_PB",
+      "rule": "INPUT_MAP_V1"
+    },
+    {
+      "legacy_tag": "I:1/1",
+      "target_tag": "Stop_PB",
+      "rule": "INPUT_MAP_V1"
+    },
+    {
+      "legacy_tag": "O:2/0",
+      "target_tag": "Conveyor_Motor",
+      "rule": "OUTPUT_MAP_V1"
+    },
+    {
+      "legacy_tag": "O:2/1",
+      "target_tag": "Run_Light",
+      "rule": "OUTPUT_MAP_V1"
+    },
+    {
+      "legacy_tag": "O:2/2",
+      "target_tag": "Warning_Horn",
+      "rule": "OUTPUT_MAP_V1"
+    },
+    {
+      "legacy_tag": "T4:0/DN",
+      "target_tag": "StartDelay.DN",
+      "rule": "TIMER_STATUS_MAP_V1"
+    },
+    {
+      "legacy_tag": "T4:0/TT",
+      "target_tag": "StartDelay.TT",
+      "rule": "TIMER_STATUS_MAP_V1"
+    }
+  ],
+  "counterexample": [],
+  "rules_used": [],
+  "warnings": [],
+  "trace_window": null
+}

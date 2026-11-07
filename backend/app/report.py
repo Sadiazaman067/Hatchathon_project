@@ -319,12 +319,18 @@ def verify(legacy_ir: Program, target_ir: Program, tag_map: list[TagMapping],
                 {"scan": e.scan, "tag": e.tag, "value": e.value}
                 for e in sorted(events, key=lambda e: e.scan) if e.scan <= divergence["scan"]
             ]
+            window = trace_window(legacy_trace, target_trace, tag_map, divergence["scan"])
+            # Evidence: the divergent observable first, then every other observable
+            # shown in trace_window, then the inputs used in the counterexample.
+            window_tags = {t for e in window["legacy"] + window["target"] for t in e.observables}
             used_inputs = {e["tag"] for e in counterexample}
             rows = [r for r in tag_map if r.kind == "observable" and r.legacy_tag == tag]
+            rows += sorted((r for r in tag_map if r.kind == "observable"
+                            and r.legacy_tag != tag and r.legacy_tag in window_tags),
+                           key=lambda r: r.legacy_tag)
             rows += sorted((r for r in tag_map
                             if r.kind == "input" and r.legacy_tag in used_inputs),
                            key=lambda r: r.legacy_tag)
-            window = trace_window(legacy_trace, target_trace, tag_map, divergence["scan"])
             return _report(
                 config, "different", [],
                 scenarios=scenarios_run, scans=scans_run, divergence=divergence,

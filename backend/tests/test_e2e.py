@@ -1,6 +1,7 @@
 """Thursday gate, end to end through the CLI with the real engine (no stand-ins).
 These inline programs are placeholders; Sadia's fixture files replace them."""
 import json
+from pathlib import Path
 
 import pytest
 
@@ -170,7 +171,65 @@ def test_unscaled_timer_preset_is_different_at_scan_6():
     }
 
 
+AI_DEMO = Path(__file__).resolve().parents[2] / "demo" / "ai_conversion"
+
+
+def run_ai_demo(capsys, target_file):
+    code = cli.main([
+        "verify", "--legacy", str(AI_DEMO / "legacy.txt"),
+        "--target", str(AI_DEMO / target_file),
+        "--map", str(AI_DEMO / "tag_map.json"),
+        "--inputs", str(AI_DEMO / "inputs.json"),
+    ])
+    assert code == 0
+    return json.loads(capsys.readouterr().out)
+
+
+def test_ai_demo_conversion_is_no_difference_observed(capsys):
+    report = run_ai_demo(capsys, "target_ai.txt")
+    assert report["status"] == "no_difference_observed"
+    assert report["coverage"] == {"scenarios": 3, "scans": 900, "seed": 42}
+    assert report["warnings"] == []
+
+
+def test_ai_demo_unscaled_preset_is_different_at_scan_21(capsys):
+    report = run_ai_demo(capsys, "target_ai_unscaled_example.txt")
+    assert report["status"] == "different"
+    assert report["first_divergence"] == {
+        "scan": 21, "tag": "O:2/0", "legacy": 0, "target": 1, "rung": 4,
+    }
+    # Divergent observable first, then every other observable in trace_window,
+    # then the inputs used in the counterexample.
+    assert [(m["legacy_tag"], m["target_tag"]) for m in report["mapping_evidence"]] == [
+        ("O:2/0", "Conveyor_Motor"),
+        ("O:2/1", "Run_Light"),
+        ("O:2/2", "Warning_Horn"),
+        ("T4:0/DN", "StartDelay.DN"),
+        ("T4:0/TT", "StartDelay.TT"),
+        ("I:1/0", "Start_PB"),
+        ("I:1/1", "Stop_PB"),
+    ]
+
+
 def test_malformed_map_exits_2(run_cli):
     code, err = run_cli(TARGET_CORRECT, tag_map=[{"legacy_tag": "I:1/0"}])
     assert code == 2
     assert err.startswith("error: tag map entry 0 must have exactly the keys")
+
+
+NEEDS_REVIEW_DEMO = Path(__file__).resolve().parents[2] / "demo" / "needs_review"
+
+
+def test_needs_review_demo_reports_unsupported_osr(capsys):
+    code = cli.main([
+        "verify", "--legacy", str(NEEDS_REVIEW_DEMO / "legacy.txt"),
+        "--target", str(NEEDS_REVIEW_DEMO / "target.txt"),
+        "--map", str(NEEDS_REVIEW_DEMO / "tag_map.json"),
+        "--inputs", str(NEEDS_REVIEW_DEMO / "inputs.json"),
+    ])
+    assert code == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["status"] == "needs_review"
+    assert report["warnings"] == [
+        "UNSUPPORTED_OPCODE: target line 1: unsupported instruction 'OSR' at column 46"
+    ]

@@ -1,0 +1,4 @@
+SOR BST XIC Start_PB NXB XIC Run_Light BND XIO Stop_PB OTE Run_Light EOR
+SOR XIC Run_Light TON StartDelay 200 0 EOR
+SOR XIC Run_Light XIO StartDelay.DN OTE Warning_Horn EOR
+SOR XIC StartDelay.DN OTE Conveyor_Motor EOR

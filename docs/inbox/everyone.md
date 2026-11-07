@@ -5,6 +5,7 @@ Each note: at most 2 lines, plain English, action first. Details live in docs/in
 
 ---
 
+- **2026-11-06 · Tami:** Read [docs/saturday_plan.md](../saturday_plan.md) before Saturday: code freeze at 6 pm, only fixes after 12 pm.
 - **2026-11-06 · Tami:** `SCAN_HORIZON` and verify()'s `check_horizon` are removed: every scenario now runs exactly `config.scans` scans (CLI `--scans`, default 300). See [docs/interfaces.md](../interfaces.md).
 - **2026-11-06 · Tami:** Read [docs/interfaces.md](../interfaces.md) for the interface additions (verify() keywords, Report, evidence format, warning codes, CLI). They need team ratification.
 - **2026-11-06 · Tami:** Run git pull, then pip install -r requirements.txt, and run pytest from the repo root.
