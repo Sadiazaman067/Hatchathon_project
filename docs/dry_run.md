@@ -1,4 +1,4 @@
-# Dry run: Sat Nov 7, 4:30 pm
+# Dry run: Sat Nov 7, 5:00 pm
 
 One laptop, Wi-Fi OFF. Write every problem in the "Problems" list at the bottom, with who fixes it. Fix only those between now and the 6 pm freeze.
 
@@ -33,7 +33,7 @@ Files: `frontend/public/demo/seal_in/` (`legacy.txt`, `target_bug_flipped_stop.t
 - [ ] Tag map: 3 rows (I:1/0 Start, I:1/1 Stop, O:2/0 Motor), all confirmed, Run enabled
 - [ ] Report: **DIFFERENT** (red), first difference at **executed scan 1**, `O:2/0` (Motor): legacy 0, target 1, rung 1. In words: Stop is pressed and the converted program turns Motor ON.
 - [ ] Replay inputs: scan 0 · I:1/0 = 1, scan 0 · I:1/1 = 1
-- [ ] Timeline draws, red box on scan 1, "Tested scenarios only. Not a proof of equivalence." is visible
+- [ ] Timeline draws, red box on scan 1, "Tested scenarios only. Not a proof the programs are the same." is visible
 
 ## 5. Demo 2: AI conversion, unscaled preset (UI)
 
@@ -51,7 +51,7 @@ Same folder, target `target_ai.txt`.
 
 - [ ] Report: **NO DIFFERENCE OBSERVED** (green) on **200 scenarios**, 60000 scans, seed 42
 - [ ] The "This is not proof the programs are the same" box is visible
-- [ ] No celebration, no banned words on screen (proven, equivalent, safe, pass)
+- [ ] No celebration, no banned words on screen (proven, equivalent, equivalence, safe, pass)
 
 ## 7. needs_review case
 

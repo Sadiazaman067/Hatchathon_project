@@ -65,7 +65,7 @@ The old and new programs receive **the same input events, not necessarily identi
 | Status | Exact interpretation |
 |---|---|
 | `different` | A mapped output or timer-status bit differed in at least one fully supported tested scenario. |
-| `no_difference_observed` | No difference was observed **under the stated profiles, scenarios, initial state, and limits**. This is not proof of equivalence or safety. |
+| `no_difference_observed` | No difference was observed **under the stated profiles, scenarios, initial state, and limits**. This is not proof that the programs are the same, and not a safety certification. |
 | `needs_review` | An instruction, tag mapping, starting state, or required semantic rule is unsupported/ambiguous/unvalidated. Never treat this as a pass. |
 
 ## MVP scope and non-goals
@@ -200,7 +200,7 @@ docs/
 Yes. It tests the *control programs inside* PLCs. It is not a general application comparator and does not manage PLC hardware inventories.
 
 **Q: Isn't this just a loop that compares two programs?**  
-Comparison is straightforward. The challenge is parsing different representations, correctly modeling stateful scans and timers, choosing meaningful scenarios, mapping equivalent signals, and independently checking that the simulator itself is correct. A flawed model can miss actual differences.
+Comparison is straightforward. The challenge is parsing different representations, correctly modeling stateful scans and timers, choosing meaningful scenarios, mapping corresponding signals, and independently checking that the simulator itself is correct. A flawed model can miss actual differences.
 
 **Q: What does behavioral simulation look like?**  
 Two virtual program executions consume the same Start/Stop/sensor events. After each simulated scan we record motor commands and supported timer status bits; a timeline shows the first disagreement. No 3D factory and no physical PLC are needed.
@@ -212,7 +212,7 @@ Modern PLCs have advanced processing, communications and task scheduling. A repe
 The initial goal is preserving the intended *observable* behavior for the supported logic. New capabilities may remain unused. LadderProof does not decide which extra features would improve the process.
 
 **Q: What if the new PLC lacks an old capability?**  
-If equivalence would need unsupported instructions, new hardware, or engineering redesign, LadderProof returns `needs_review` rather than inventing a replacement. It cannot fix missing physical interfaces.
+If matching behavior would need unsupported instructions, new hardware, or engineering redesign, LadderProof returns `needs_review` rather than inventing a replacement. It cannot fix missing physical interfaces.
 
 **Q: Does LadderProof convert code, check it, or fix it?**  
 A basic rule translator can propose a supported conversion; the main feature **checks** old versus target behavior. The MVP **does not automatically repair** verified differences. Engineers review and modify programs themselves.
@@ -236,7 +236,7 @@ No for the hackathon. Use self-authored fixtures and authorized public examples 
 No. An engineer interview or externally reviewed example would strengthen credibility, but our priority is accurate internal golden tests and transparent results by November 9.
 
 **Q: Can this prove a migrated program is safe?**  
-No. `no_difference_observed` only summarizes the tested scenarios under documented modeling assumptions. It is neither formal equivalence nor certification for industrial equipment.
+No. `no_difference_observed` only summarizes the tested scenarios under documented modeling assumptions. It is not a formal proof that the programs are the same, and not certification for industrial equipment.
 
 ## Reference material and responsible claims
 

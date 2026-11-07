@@ -1,6 +1,6 @@
 import { plural, targetName, type Report } from "./types";
 
-export const NOT_A_PROOF = "Tested scenarios only. Not a proof of equivalence.";
+export const NOT_A_PROOF = "Tested scenarios only. Not a proof the programs are the same.";
 
 // Solid status fill with sheet-colored text (the near-white token; no hex outside tokens.css).
 const TAG_STYLE = {

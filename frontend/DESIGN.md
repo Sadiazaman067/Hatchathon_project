@@ -15,7 +15,7 @@ Why: generic AI UIs are dark dashboards with glowing cards and one accent color.
 
 1. **Color means status, nothing else.** Red = `different`. Amber = `needs_review`. Green = `no_difference_observed`. Everything else is ink, grey and paper. No blue links, no purple buttons, no colored icons for decoration.
 2. **Every status color also has a text label** (the word DIFFERENT, NEEDS REVIEW, NO DIFFERENCE OBSERVED). Never color alone.
-3. **Wording:** never "proven", "equivalent", "safe", "verified correct", "pass". Say "no difference observed on N scenarios". Every report shows: "Tested scenarios only. Not a proof of equivalence."
+3. **Wording:** never "proven", "equivalent", "equivalence", "safe", "verified correct", "pass". Say "no difference observed on N scenarios". Every report shows: "Tested scenarios only. Not a proof the programs are the same."
 4. **The UI never decides anything.** It shows the `Report` JSON from CONTRACT.md section 8. It never computes a verdict, a first difference, or a number that isn't in the report.
 5. **Never invent data.** If a field is missing or null, show "not available", not a guess. Demo data is labeled SAMPLE DATA until it is a measured result.
 6. **No:** gradients, glows, drop shadows on cards, glassmorphism, emoji, rounded pill cards everywhere, stock illustrations, icon libraries for decoration, dark mode (not needed for P0).
@@ -123,7 +123,7 @@ The pitch video uses title cards in this same style (grid paper, sheet, serif he
 ## 9. Before you call a screen done
 
 - [ ] Every color used means a status, and every status has its word.
-- [ ] No banned words (proven, equivalent, safe, pass).
+- [ ] No banned words (proven, equivalent, equivalence, safe, pass).
 - [ ] Every number on screen traces to a field in the report or the request.
 - [ ] Readable at 1920×1080 from across a room: headline, verdict tag and timeline.
 - [ ] Keyboard: every control reachable with Tab, visible focus ring (2px ink outline).
