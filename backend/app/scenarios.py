@@ -2,7 +2,8 @@
 
 Each scenario is a list of the shared ir.InputEvent objects. A scenario
 is *not* its own execution trace; semantics.run() performs the execution.
-The number of executed scans is a separate unresolved contract concern.
+Pass the requested scan count to semantics.run(..., scans=scans) to ensure
+that the requested execution horizon is actually covered.
 """
 
 from __future__ import annotations
@@ -15,10 +16,11 @@ from . import ir
 
 
 def _read_inputs(program_ir: ir.Program) -> list[str]:
-    """Infer inputs as contacts not written by any output coil.
+    """Infer external contacts by excluding coils and generated timer bits.
 
-    This is only a convenience for hand-built P0 test programs. In an
-    industrial workflow, use explicit input tags from a confirmed tag map.
+    A TON owns its EN, TT and DN status bits, just as OTE owns its coil.
+    Timer status contacts must never be emitted as physical InputEvents.
+    For production verification, prefer explicitly confirmed input_tags.
     """
     read: set[str] = set()
     written: set[str] = set()
@@ -39,7 +41,14 @@ def _read_inputs(program_ir: ir.Program) -> list[str]:
                 if isinstance(instr, ir.OTE):
                     written.add(instr.tag)
                 elif isinstance(instr, ir.TON):
-                    raise ValueError("Timer boundary scenarios require the S6 validation gate")
+                    if not isinstance(instr.timer, str) or not instr.timer:
+                        raise ValueError("Timer name must be a nonempty string")
+                    # The generator is profile-agnostic. Recognize both native
+                    # tag spellings; semantics.run() validates the chosen
+                    # profile and the instruction's timebase/preset.
+                    for bit in ("EN", "TT", "DN"):
+                        written.add(f"{instr.timer}/{bit}")  # SLC
+                        written.add(f"{instr.timer}.{bit}")  # Logix
                 else:
                     raise ValueError(f"Unsupported output: {type(instr).__name__}")
     return sorted(read - written)
@@ -60,9 +69,9 @@ def generate_scenarios(
     random toggles. Each scenario explicitly initializes every input at
     scan 0. No global PRNG state is used.
 
-    `scans` limits event times; the frozen run() contract does not yet
-    specify how to force execution through that horizon when inputs are
-    unchanged. Do not claim `scans` are executed until that is resolved.
+    `scans` bounds event timestamps; it does NOT execute the program.
+    The caller must separately run each history through
+    semantics.run(..., scans=scans) for full-horizon coverage.
     """
     if type(seed) is not int or seed < 0:
         raise ValueError("seed must be a nonnegative integer")
