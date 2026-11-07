@@ -17,12 +17,65 @@ export default function ReportScreen({ report, sample = false }: { report: Repor
       )}
       {report.status === "different" && report.first_divergence ? (
         <DifferentReport report={report} />
+      ) : report.status === "no_difference_observed" ? (
+        <NoDifferenceReport report={report} />
       ) : (
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
-          <VerdictBlock report={report} />
-          <TitleBlock report={report} />
-        </div>
+        <NeedsReviewReport report={report} />
       )}
+    </div>
+  );
+}
+
+/** "CODE: message" -> code in mono, then the message. Warnings without a code show whole. */
+function splitWarning(warning: string): [string | null, string] {
+  const match = /^([A-Z][A-Z0-9_]+): (.*)$/s.exec(warning);
+  return match ? [match[1], match[2]] : [null, warning];
+}
+
+function NeedsReviewReport({ report }: { report: Report }) {
+  return (
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="flex min-w-0 flex-col gap-8">
+        <VerdictBlock report={report} />
+        <section aria-labelledby="review-items" className="flex flex-col gap-2">
+          <h2 id="review-items" className="m-0 font-mono text-[11px] font-normal uppercase tracking-[0.12em] text-muted">
+            What needs review · {report.warnings.length}
+          </h2>
+          {report.warnings.length === 0 ? (
+            <p className="m-0 font-mono text-[13px] text-muted">No warnings were given: not available.</p>
+          ) : (
+            <ul className="m-0 list-none border border-amber p-0">
+              {report.warnings.map((w, i) => {
+                const [code, message] = splitWarning(w);
+                return (
+                  <li key={i} className="flex flex-col gap-1 border-b border-hair bg-amber-tint px-4 py-3 last:border-b-0">
+                    {code && <span className="font-mono text-[13px] font-semibold text-amber-text">{code}</span>}
+                    <span className="font-mono text-[14px]">{message}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+      </div>
+      <aside className="flex flex-col gap-7">
+        <TitleBlock report={report} />
+        <MappingEvidenceTable report={report} />
+      </aside>
+    </div>
+  );
+}
+
+function NoDifferenceReport({ report }: { report: Report }) {
+  return (
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="flex min-w-0 flex-col gap-8">
+        <VerdictBlock report={report} />
+        <MappingEvidenceTable report={report} />
+      </div>
+      <aside className="flex flex-col gap-7">
+        <TitleBlock report={report} />
+      </aside>
     </div>
   );
 }
