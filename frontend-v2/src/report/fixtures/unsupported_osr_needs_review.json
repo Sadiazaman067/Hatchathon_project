@@ -1,0 +1,24 @@
+{
+  "status": "needs_review",
+  "coverage": {
+    "scenarios": 0,
+    "scans": 0,
+    "seed": 42
+  },
+  "assumptions": {
+    "dt_ms": 10,
+    "executed_scan_index": "1_based",
+    "profiles": [
+      "slc_subset_v1",
+      "logix_subset_v1"
+    ]
+  },
+  "first_divergence": null,
+  "mapping_evidence": [],
+  "counterexample": [],
+  "rules_used": [],
+  "warnings": [
+    "UNSUPPORTED_OPCODE: target line 1: unsupported instruction 'OSR' at column 46"
+  ],
+  "trace_window": null
+}

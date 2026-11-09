@@ -10,6 +10,7 @@ from __future__ import annotations
 from backend.app.ir import TagMapping, Trace, TraceEntry
 
 WINDOW_RADIUS = 5  # CONTRACT §8: up to 5 scans before and 5 after
+MATCHING_WINDOW = 30  # CONTRACT §8: matching-run clip, first scenario only
 _SIDES = ("legacy", "target")
 
 
@@ -144,4 +145,20 @@ def trace_window(
         "end_scan": scans[hi],
         "legacy": legacy_c[lo:hi + 1],
         "target": target_c[lo:hi + 1],
+    }
+
+
+def matching_trace_window(
+    legacy_trace: Trace, target_trace: Trace, tag_map: list[TagMapping]
+) -> dict:
+    """First MATCHING_WINDOW executed scans of this scenario, canonical names."""
+    legacy_c, target_c = _canonical_pair(legacy_trace, target_trace, tag_map)
+    n = min(len(legacy_c), len(target_c), MATCHING_WINDOW)
+    if n == 0:
+        raise ComparisonError("EMPTY_TRACE", "matching clip needs at least one executed scan")
+    return {
+        "start_scan": legacy_c[0].scan,
+        "end_scan": legacy_c[n - 1].scan,
+        "legacy": legacy_c[:n],
+        "target": target_c[:n],
     }

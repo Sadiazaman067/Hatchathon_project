@@ -122,7 +122,13 @@ def test_correct_target_is_no_difference_observed(use_engine):
     result = report.verify(LEGACY, TARGET, MAP, CONFIG, input_scenarios=[EVENTS])
     assert result["status"] == "no_difference_observed"
     assert result["first_divergence"] is None
-    assert result["trace_window"] is None
+    assert result["trace_window"] == {
+        "start_scan": 1, "end_scan": 2,
+        "legacy": [{"scan": 1, "observables": {"O:2/0": 1}},
+                   {"scan": 2, "observables": {"O:2/0": 1}}],
+        "target": [{"scan": 1, "observables": {"O:2/0": 1}},
+                   {"scan": 2, "observables": {"O:2/0": 1}}],
+    }
     assert result["counterexample"] == []
     assert result["warnings"] == []
     assert result["coverage"] == {"scenarios": 1, "scans": 2, "seed": 7}
@@ -130,6 +136,22 @@ def test_correct_target_is_no_difference_observed(use_engine):
 
 
 LONG = VerifyConfig(seed=7, scenarios=1, scans=300, dt_ms=10)
+
+
+def test_matching_clip_is_capped_at_thirty_scans(use_engine):
+    forty = list(range(40))
+    use_engine(FakeEngine({
+        "slc_subset_v1": [TraceEntry(scan=i + 1, observables={"O:2/0": 1}) for i in forty],
+        "logix_subset_v1": [TraceEntry(scan=i + 1, observables={"Motor": 1}) for i in forty],
+    }))
+    result = report.verify(
+        LEGACY, TARGET, MAP, VerifyConfig(seed=7, scenarios=1, scans=40, dt_ms=10),
+        input_scenarios=[EVENTS],
+    )
+    assert result["status"] == "no_difference_observed"
+    assert result["trace_window"]["start_scan"] == 1
+    assert result["trace_window"]["end_scan"] == 30
+    assert len(result["trace_window"]["legacy"]) == 30
 
 
 def test_both_runs_get_config_scans(use_engine):

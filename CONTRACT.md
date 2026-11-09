@@ -239,9 +239,9 @@ The example assumes old logic energizes Motor for `Start=1` and the seeded targe
 | `counterexample` | Sorted input-event prefix sufficient to reproduce a difference; `[]` if none found / review-only |
 | `rules_used` | List of deterministic conversion rule identifiers; `[]` when comparing user-supplied target |
 | `warnings` | List of human-readable diagnostic strings with leading stable code, e.g. `UNSUPPORTED_OPCODE: line 3 ...` |
-| `trace_window` | On `different`, `{start_scan:int,end_scan:int,legacy:[TraceEntry],target:[TraceEntry]}` covering the first divergence; else `null` |
+| `trace_window` | On `different`, `{start_scan:int,end_scan:int,legacy:[TraceEntry],target:[TraceEntry]}` covering the first divergence. On `no_difference_observed`, the same shape for the first `MATCHING_WINDOW` (30) executed scans of scenario 1. On `needs_review`, `null` |
 
-**Trace-window policy:** emit at most **5 scans before and 5 after** the first divergent scan (bounded to the available executed-scan range), with legacy and target entries having **identical scan numbers**. This is bounded UI data—not the full 60,000-scan benchmark stream. Include the earliest divergence in the window. On no difference or review-only, use `null`.
+**Trace-window policy:** on `different`, emit at most **5 scans before and 5 after** the first divergent scan (bounded to the available executed-scan range), with legacy and target entries having **identical scan numbers**. Include the earliest divergence in the window. On `no_difference_observed`, emit the first **30** executed scans of scenario 1 (or fewer if that scenario is shorter). This is bounded UI data—not the full 60,000-scan benchmark stream. On `needs_review`, use `null`.
 
 **Failure precedence:** if unsupported/ambiguous/unvalidated behavior prevents comprehensive comparison of the requested program, return `needs_review` with warnings, not a misleading green `no_difference_observed`. The app may show partial observations as supplementary diagnostics, but `status` still reflects incomplete coverage.
 
