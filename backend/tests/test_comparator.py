@@ -1,7 +1,8 @@
 import pytest
 
 from backend.app.comparator import (
-    ComparisonError, canonical_observables, first_divergence, trace_window,
+    ComparisonError, canonical_observables, first_divergence,
+    matching_trace_window, MATCHING_WINDOW, trace_window,
 )
 from backend.app.ir import TagMapping, TraceEntry
 
@@ -130,3 +131,14 @@ def test_trace_window_bounds(scan, start, end):
 def test_trace_window_uses_canonical_names():
     window = trace_window(LEGACY_20, TARGET_20, SEAL, 1)
     assert window["target"][0] == TraceEntry(scan=1, observables={"O:2/0": 0})
+
+
+def test_matching_trace_window_is_capped():
+    assert MATCHING_WINDOW == 30
+    long_legacy = trace(*[{"O:2/0": 1}] * 40)
+    long_target = trace(*[{"Motor": 1}] * 40)
+    window = matching_trace_window(long_legacy, long_target, SEAL)
+    assert window["start_scan"] == 1
+    assert window["end_scan"] == 30
+    assert len(window["legacy"]) == 30
+    assert window["target"][0] == TraceEntry(scan=1, observables={"O:2/0": 1})

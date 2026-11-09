@@ -1,0 +1,21 @@
+/* Duplicated from frontend/src/styles/tokens.css — do not import across packages. */
+:root {
+  --paper: #f3f1eb;
+  --sheet: #fbfaf6;
+  --ink: #1c1b19;
+  --muted: #5c584f;
+  --hair: #cfc9bd;
+  --hair-2: #e3ded3;
+
+  --red: #b42318;
+  --red-tint: rgba(180, 35, 24, 0.09);
+  --amber: #b54708;
+  --amber-text: #8a3a06;
+  --amber-tint: rgba(181, 71, 8, 0.07);
+  --green: #067647;
+  --green-tint: rgba(6, 118, 71, 0.09);
+
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-serif: "IBM Plex Serif", Georgia, serif;
+}

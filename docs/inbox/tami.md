@@ -5,6 +5,9 @@ Each note: at most 2 lines, plain English, action first. Details live in docs/in
 
 ---
 
+- **2026-11-09 · Adaora:** Please review CONTRACT §8: `no_difference_observed` now includes a capped `trace_window` (first 30 scans of scenario 1) so the demo conveyor can replay matching runs. `needs_review` stays null. Details in comparator.MATCHING_WINDOW.
+
+
 - **2026-11-06 · Sadia:** Seal-in fixtures are in `backend/tests/fixtures/seal_in/` with the names from today_plan.md. 16 practice cases (bugs + clean controls) are in `fixtures/practice/`, answer key in `fixtures/README.md`.
 - **2026-11-06 · Sadia:** Timer fixtures are in `fixtures/delayed_start_ton/`. Expected first difference is scan 6 under proposed S6 (the build plan says 5), so Arnav's gate decides.
 

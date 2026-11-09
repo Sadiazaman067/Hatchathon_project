@@ -1,0 +1,405 @@
+{
+  "status": "no_difference_observed",
+  "coverage": {
+    "scenarios": 1,
+    "scans": 30,
+    "seed": 42
+  },
+  "assumptions": {
+    "dt_ms": 10,
+    "executed_scan_index": "1_based",
+    "profiles": [
+      "slc_subset_v1",
+      "logix_subset_v1"
+    ]
+  },
+  "first_divergence": null,
+  "mapping_evidence": [
+    {
+      "legacy_tag": "I:1/0",
+      "target_tag": "Start",
+      "rule": "INPUT_MAP_V1"
+    },
+    {
+      "legacy_tag": "I:1/1",
+      "target_tag": "Stop",
+      "rule": "INPUT_MAP_V1"
+    },
+    {
+      "legacy_tag": "O:2/0",
+      "target_tag": "Motor",
+      "rule": "OUTPUT_MAP_V1"
+    }
+  ],
+  "counterexample": [],
+  "rules_used": [],
+  "warnings": [],
+  "trace_window": {
+    "start_scan": 1,
+    "end_scan": 30,
+    "legacy": [
+      {
+        "scan": 1,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 2,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 3,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 4,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 5,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 6,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 7,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 8,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 9,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 10,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 11,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 12,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 13,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 14,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 15,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 16,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 17,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 18,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 19,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 20,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 21,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 22,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 23,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 24,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 25,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 26,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 27,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 28,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 29,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 30,
+        "observables": {
+          "O:2/0": 0
+        }
+      }
+    ],
+    "target": [
+      {
+        "scan": 1,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 2,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 3,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 4,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 5,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 6,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 7,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 8,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 9,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 10,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 11,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 12,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 13,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 14,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 15,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 16,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 17,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 18,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 19,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 20,
+        "observables": {
+          "O:2/0": 1
+        }
+      },
+      {
+        "scan": 21,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 22,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 23,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 24,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 25,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 26,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 27,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 28,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 29,
+        "observables": {
+          "O:2/0": 0
+        }
+      },
+      {
+        "scan": 30,
+        "observables": {
+          "O:2/0": 0
+        }
+      }
+    ]
+  }
+}

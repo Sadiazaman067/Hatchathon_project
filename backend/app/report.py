@@ -16,6 +16,7 @@ from typing import Literal, TypedDict
 from backend.app.comparator import (
     ComparisonError,
     first_divergence,
+    matching_trace_window,
     missing_observable,
     trace_window,
 )
@@ -283,10 +284,18 @@ def verify(legacy_ir: Program, target_ir: Program, tag_map: list[TagMapping],
         return _report(config, "needs_review", ["NO_SCENARIOS: there are no input scenarios to run"])
 
     scenarios_run = scans_run = 0
+    matching_window = None
 
     def review(message: str) -> Report:
         return _report(config, "needs_review", [message],
                        scenarios=scenarios_run, scans=scans_run)
+
+    def window_dict(window) -> dict:
+        return {
+            "start_scan": window["start_scan"], "end_scan": window["end_scan"],
+            "legacy": [asdict(e) for e in window["legacy"]],
+            "target": [asdict(e) for e in window["target"]],
+        }
 
     for events in input_scenarios:
         try:
@@ -335,14 +344,16 @@ def verify(legacy_ir: Program, target_ir: Program, tag_map: list[TagMapping],
                 config, "different", [],
                 scenarios=scenarios_run, scans=scans_run, divergence=divergence,
                 mapping_evidence=_evidence(rows), counterexample=counterexample,
-                window={
-                    "start_scan": window["start_scan"], "end_scan": window["end_scan"],
-                    "legacy": [asdict(e) for e in window["legacy"]],
-                    "target": [asdict(e) for e in window["target"]],
-                },
+                window=window_dict(window),
+            )
+
+        if matching_window is None:
+            matching_window = window_dict(
+                matching_trace_window(legacy_trace, target_trace, tag_map)
             )
 
     return _report(
         config, "no_difference_observed", [],
         scenarios=scenarios_run, scans=scans_run, mapping_evidence=_evidence(tag_map),
+        window=matching_window,
     )
