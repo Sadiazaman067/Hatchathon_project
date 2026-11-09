@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import Climber from "./landing/Climber";
 
 type Props = {
   onTry: () => void;
@@ -56,7 +55,6 @@ export default function LandingView({ onTry }: Props) {
         </div>
       </div>
       <aside className="landing-stage" aria-hidden="true">
-        <Climber rootRef={rootRef} tryRef={tryRef} />
       </aside>
     </div>
   );
