@@ -56,6 +56,9 @@ select {
   max-width: 1400px;
   margin: 0 auto;
   padding: 28px 24px 48px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .masthead {
@@ -82,6 +85,20 @@ select {
   font-weight: 400;
   font-size: 28px;
   letter-spacing: 0.02em;
+}
+
+.wordmark-home {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
 }
 
 .brand-mark {
@@ -145,6 +162,28 @@ select {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  flex: 1;
+  min-height: calc(100vh - 120px);
+}
+
+.workspace .sheet {
+  flex: 1 1 auto;
+}
+
+.step-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  padding: 10px 16px;
+  border: 1px solid var(--hair);
+  background: var(--sheet);
+}
+
+.step-footer .ink-btn.primary {
+  margin-left: auto;
 }
 
 .sheet {

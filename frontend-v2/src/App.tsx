@@ -6,6 +6,7 @@ import SessionView from "./components/home/SessionView";
 import ReportView from "./components/ReportView";
 import ConvertStep from "./components/workflow/ConvertStep";
 import ReportStep from "./components/workflow/ReportStep";
+import StepFooter from "./components/workflow/StepFooter";
 import StepRail from "./components/workflow/StepRail";
 import TagMapStep from "./components/workflow/TagMapStep";
 import UploadStep from "./components/workflow/UploadStep";
@@ -27,12 +28,22 @@ import { statusLabel } from "./playback/plainLanguage";
 import { FIXTURES } from "./report/fixtures";
 import type { Report } from "./report/types";
 import { validateReport } from "./report/validate";
+import {
+  applyDemo,
+  continueReason,
+  hasBlockingDiagnostics,
+  needsUpload,
+  primaryLabel,
+  tagMapAfterUpload,
+  type SessionSeed,
+  type TargetSource,
+  type UploadedPair,
+} from "./workflow/demoSession";
 import { rememberSession, sessionEntry, type SessionRun } from "./workflow/session";
-import type { StepId } from "./workflow/steps";
+import { STEPS, type StepId } from "./workflow/steps";
 import { allRowsConfirmed } from "./workflow/tagMap";
 
 type Route = "landing" | "new" | "results" | "samples" | "past";
-type TargetSource = "none" | "uploaded" | "converted";
 type ResultSource = "none" | "live" | "sample";
 
 function asError(error: unknown): ApiError {
@@ -45,6 +56,7 @@ export default function App() {
   const [step, setStep] = useState<StepId>("upload");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
+  const [navMessage, setNavMessage] = useState<string | null>(null);
 
   const [legacyText, setLegacyText] = useState("");
   const [targetText, setTargetText] = useState("");
@@ -58,6 +70,7 @@ export default function App() {
   const [settings, setSettings] = useState<VerifySettings>(DEFAULT_SETTINGS);
   const [liveReport, setLiveReport] = useState<Report | null>(null);
   const [invalidLive, setInvalidLive] = useState<string | null>(null);
+  const [uploaded, setUploaded] = useState<UploadedPair | null>(null);
   const [sessionRuns, setSessionRuns] = useState<SessionRun[]>([]);
   const [fixtureId, setFixtureId] = useState(FIXTURES[0]?.id ?? "");
   const fixture = FIXTURES.find((f) => f.id === fixtureId) ?? FIXTURES[0];
@@ -107,6 +120,17 @@ export default function App() {
     report: liveReport ? statusLabel(liveReport.status) : "no report yet",
   };
 
+  const gate = continueReason({
+    step,
+    legacyText,
+    targetSource,
+    convertAttempted,
+    tagMap,
+    settings,
+    projectId,
+    mapConfirmed,
+  });
+
   async function run<T>(label: string, work: () => Promise<T>): Promise<T | null> {
     setBusy(label);
     setError(null);
@@ -118,6 +142,24 @@ export default function App() {
     } finally {
       setBusy(null);
     }
+  }
+
+  function applySeed(seed: SessionSeed) {
+    setLegacyText(seed.legacyText);
+    setTargetText(seed.targetText);
+    setTagMap(seed.tagMap);
+    setSettings(seed.settings);
+    setProjectId(seed.projectId);
+    setUploadResult(seed.uploadResult);
+    setTargetSource(seed.targetSource);
+    setConvertAsked(seed.convertAsked);
+    setConvertAttempted(seed.convertAttempted);
+    setConvertResult(seed.convertResult);
+    setLiveReport(seed.liveReport);
+    setInvalidLive(seed.invalidLive);
+    setUploaded(seed.uploaded);
+    setError(null);
+    setNavMessage(null);
   }
 
   function applyReport(raw: unknown, fromProjectId: string | null) {
@@ -137,19 +179,28 @@ export default function App() {
     }
   }
 
-  async function onUpload() {
+  async function onUpload(): Promise<CreateProjectResponse | null> {
     const target = targetText.trim() === "" ? null : targetText;
     const created = await run("POST /api/projects", () => createProject(legacyText, target));
-    if (!created) return;
+    if (!created) return null;
     setUploadResult(created);
     setProjectId(created.project_id);
     setTargetSource(target ? "uploaded" : "none");
     setConvertAsked(false);
     setConvertAttempted(false);
     setConvertResult(null);
-    setTagMap([]);
+    setTagMap((current) => tagMapAfterUpload(current));
     setLiveReport(null);
     setInvalidLive(null);
+    setUploaded({ legacy: legacyText, target: targetText });
+    return created;
+  }
+
+  async function ensureUploaded(): Promise<CreateProjectResponse | null> {
+    if (!needsUpload(projectId, legacyText, targetText, uploaded)) {
+      return uploadResult;
+    }
+    return onUpload();
   }
 
   async function onConvert() {
@@ -165,13 +216,13 @@ export default function App() {
     }
   }
 
-  async function onVerify() {
-    if (!projectId || !mapConfirmed) return;
+  async function onVerify(id: string | null = projectId) {
+    if (!id || !mapConfirmed) return;
     const raw = await run("POST /api/projects/{id}/verify", () =>
-      verifyProject(projectId, tagMap, true, settings),
+      verifyProject(id, tagMap, true, settings),
     );
     if (raw === null) return;
-    applyReport(raw, projectId);
+    applyReport(raw, id);
   }
 
   async function onFetchReport() {
@@ -191,12 +242,63 @@ export default function App() {
   function go(id: StepId) {
     if (!enabled[id]) return;
     setError(null);
+    setNavMessage(null);
     setStep(id);
   }
 
   function enterApp() {
+    applySeed(applyDemo());
+    setResultSource("none");
     setRoute("new");
     setStep("upload");
+  }
+
+  function onBack() {
+    const index = STEPS.findIndex((item) => item.id === step);
+    if (index <= 0) return;
+    setError(null);
+    setNavMessage(null);
+    setStep(STEPS[index - 1].id);
+  }
+
+  async function onPrimary() {
+    setError(null);
+    if (gate) {
+      setNavMessage(gate);
+      return;
+    }
+    setNavMessage(null);
+    if (step === "upload") {
+      const created = await ensureUploaded();
+      if (!created) return;
+      if (hasBlockingDiagnostics(created)) {
+        setNavMessage("Fix parse diagnostics before continuing.");
+        return;
+      }
+      setStep("convert");
+      return;
+    }
+    if (step === "convert") {
+      setConvertAsked(false);
+      setStep("tagmap");
+      return;
+    }
+    if (step === "tagmap") {
+      setStep("verify");
+      return;
+    }
+    if (step === "verify") {
+      setStep("report");
+      return;
+    }
+    const created = await ensureUploaded();
+    if (!created) return;
+    if (hasBlockingDiagnostics(created)) {
+      setNavMessage("Fix parse diagnostics before continuing.");
+      setStep("upload");
+      return;
+    }
+    await onVerify(created.project_id);
   }
 
   const liveTargetText =
@@ -208,15 +310,17 @@ export default function App() {
     <div className="page">
       <header className={`masthead${inApp ? "" : " landing-bar"}`}>
         <h1 className="wordmark">
-          <svg className="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              d="M6 2v20M18 2v20M6 6h12M6 12h12M6 18h12"
-            />
-          </svg>
-          LadderProof
+          <button type="button" className="wordmark-home" onClick={() => setRoute("landing")}>
+            <svg className="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                d="M6 2v20M18 2v20M6 6h12M6 12h12M6 18h12"
+              />
+            </svg>
+            LadderProof
+          </button>
         </h1>
         {inApp ? (
           <>
@@ -384,6 +488,19 @@ export default function App() {
               />
             ) : null}
           </DrawingSheet>
+          {navMessage ? (
+            <p className="idle-note" role="status">
+              {navMessage}
+            </p>
+          ) : null}
+          <StepFooter
+            showBack={step !== "upload"}
+            primaryLabel={primaryLabel(step)}
+            primaryDisabled={gate !== null}
+            busy={!!busy}
+            onBack={onBack}
+            onPrimary={() => void onPrimary()}
+          />
         </div>
       ) : null}
     </div>
